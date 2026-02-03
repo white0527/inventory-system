@@ -3,298 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>祥易機車材料進銷存</title>
+    <title>祥易機車材料 - 未來雲端版</title>
     <style>
-        /* 全局設定：模仿傳統 Windows 軟體風格 */
+        /* === 全局設定：iOS 未來風格 === */
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --primary-color: #007AFF; /* iOS Blue */
+            --danger-color: #FF3B30; /* iOS Red */
+            --text-color: #1d1d1f;
+            --radius-large: 24px;
+            --radius-medium: 16px;
+            --radius-small: 10px;
+        }
+
         body {
-            font-family: 'PMingLiU', 'MingLiU', sans-serif; /* 細明體比較像傳統軟體 */
-            background-color: #808080; /* 背景深灰，像應用程式桌面 */
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
             margin: 0;
             padding: 0;
             height: 100vh;
             overflow: hidden;
+            color: var(--text-color);
+            /* 背景：動態流體漸層 */
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
         }
 
-        /* === 第一層：頂部選單列 === */
-        #main-menu-bar {
-            background-color: #f0f0f0;
-            border-bottom: 2px solid #fff;
-            padding: 5px 10px;
-            display: flex;
-            gap: 15px;
-            font-size: 16px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        /* 遮罩層 (讓背景稍微暗一點，凸顯玻璃) */
+        .backdrop-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            z-index: -1;
         }
+
+        /* === 第一層：頂部懸浮 Dock === */
+        #main-menu-bar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 10px 20px;
+            border-radius: 100px; /* 膠囊狀 */
+            display: flex;
+            gap: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--glass-border);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
         .menu-item {
             cursor: pointer;
-            padding: 2px 8px;
-            color: #000;
-            text-decoration: none;
-        }
-        .menu-item:hover {
-            background-color: #000080; /* 經典反白 */
-            color: #fff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #555;
+            transition: all 0.2s ease;
         }
 
-        /* === 第二層：功能視窗 (門市現銷) === */
+        .menu-item:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #000;
+            transform: scale(1.05);
+        }
+        
+        .menu-item.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        /* === 第二層：玻璃擬態視窗 === */
         #sales-window {
             display: none; /* 預設隱藏 */
             position: absolute;
-            top: 50px;
+            top: 100px;
             left: 50%;
             transform: translateX(-50%);
-            width: 95%;
-            max-width: 1000px;
-            background-color: #d4d0c8; /* 經典 Windows 灰 */
-            border: 2px solid #fff;
-            border-right-color: #404040;
-            border-bottom-color: #404040;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
-            padding: 5px;
+            width: 90%;
+            max-width: 1100px;
+            height: 80vh;
+            
+            /* 核心玻璃效果 */
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: var(--radius-large);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: popIn 0.4s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        /* 標題列 */
-        .window-title {
-            background: linear-gradient(to right, #000080, #1084d0);
-            color: white;
-            padding: 5px;
-            font-weight: bold;
+        @keyframes popIn {
+            0% { opacity: 0; transform: translate(-50%, 20px) scale(0.95); }
+            100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+        }
+
+        /* 視窗標題列 */
+        .window-header {
+            padding: 20px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .window-title {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #007AFF, #5AC8FA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .close-btn {
-            background: #d4d0c8;
-            color: black;
-            border: 1px solid #fff;
-            border-right-color: #404040;
-            border-bottom-color: #404040;
-            width: 20px;
-            height: 20px;
-            text-align: center;
-            line-height: 18px;
-            cursor: pointer;
-            font-family: Arial;
-        }
-
-        /* 上方資訊區 (表頭) */
-        .header-section {
-            display: grid;
-            grid-template-columns: 3fr 1fr; /* 左邊輸入，右邊大金額 */
-            gap: 10px;
-            padding: 10px;
-            border: 1px solid #808080;
-            margin-top: 5px;
-        }
-        .form-row {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.05);
             display: flex;
-            gap: 10px;
-            margin-bottom: 5px;
             align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #666;
+            font-weight: bold;
         }
-        .form-label {
-            width: 70px;
-            text-align: right;
-        }
-        input {
-            border: 2px inset #d4d0c8;
-            padding: 2px;
-            font-family: 'PMingLiU';
-        }
-        
-        /* 右邊那個大大的總金額 */
-        .big-total-box {
-            background-color: #fff;
-            border: 2px inset #d4d0c8;
+        .close-btn:hover { background: rgba(0,0,0,0.1); color: #000; }
+
+        /* 內容區 */
+        .window-content {
+            padding: 20px 30px;
+            flex-grow: 1;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: flex-end;
-            padding-right: 10px;
-        }
-        .big-total-label { font-size: 12px; }
-        #big-total-display {
-            font-size: 48px;
-            color: blue;
-            font-weight: bold;
-            font-family: 'Arial', sans-serif;
-            margin: 0;
+            gap: 20px;
         }
 
-        /* === 核心：商品表格 (復古風格) === */
-        .table-container {
-            margin-top: 10px;
-            height: 300px;
-            overflow-y: auto;
-            background-color: #fff;
-            border: 2px inset #d4d0c8;
+        /* 表單區域 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 20px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
         }
+        
+        /* iOS 風格輸入框 */
+        input {
+            background: rgba(255, 255, 255, 0.5);
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--radius-small);
+            font-size: 15px;
+            color: #333;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            transition: 0.2s;
+            outline: none;
+        }
+        input:focus {
+            background: #fff;
+            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.3);
+        }
+        input:disabled { background: rgba(0,0,0,0.03); color: #888; }
+
+        /* 總金額顯示 (像股票 APP) */
+        .total-card {
+            background: linear-gradient(135deg, #007AFF 0%, #0055b3 100%);
+            color: white;
+            border-radius: var(--radius-medium);
+            padding: 15px;
+            text-align: right;
+            box-shadow: 0 10px 20px rgba(0, 122, 255, 0.25);
+        }
+        .total-label { font-size: 13px; opacity: 0.8; }
+        .total-amount { font-size: 32px; font-weight: 700; letter-spacing: -1px; }
+
+        /* 表格區 */
+        .table-wrapper {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: var(--radius-medium);
+            overflow: hidden;
+            flex-grow: 1;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        table { width: 100%; border-collapse: collapse; }
         th {
-            background-color: #00ffff; /* 經典青色表頭 */
-            color: black;
-            border: 1px solid #00ff00; /* 綠色框線 */
-            padding: 4px;
-            font-weight: normal;
-            font-size: 14px;
-            position: sticky;
-            top: 0;
+            text-align: left;
+            padding: 12px 15px;
+            font-size: 13px;
+            color: #666;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            background: rgba(255,255,255,0.3);
         }
         td {
-            border: 1px solid #00ff00; /* 綠色框線 */
-            padding: 4px;
-            color: black;
-            font-size: 14px;
+            padding: 8px 15px;
+            border-bottom: 1px solid rgba(0,0,0,0.03);
+            font-size: 15px;
         }
-        /* 讓輸入框融入表格 */
-        td input {
-            width: 90%;
-            border: none;
-            outline: none;
-            background: transparent;
-        }
+        /* 表格內的輸入框要透明一點 */
+        td input { background: transparent; box-shadow: none; padding: 5px; width: 100%; }
+        td input:focus { background: white; }
 
-        /* === 底部按鈕區 === */
-        .footer-section {
-            margin-top: 10px;
-            padding: 10px;
-            border-top: 1px solid #808080;
+        /* 底部按鈕區 */
+        .action-bar {
+            padding: 15px 30px;
+            background: rgba(255,255,255,0.3);
+            border-top: 1px solid rgba(0,0,0,0.05);
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            background-color: #d4d0c8;
+            gap: 12px;
+            align-items: center;
         }
-        .btn-retro {
-            background-color: #d4d0c8;
-            border: 2px solid #fff;
-            border-right-color: #404040;
-            border-bottom-color: #404040;
-            padding: 5px 15px;
+        
+        .spacer { flex-grow: 1; }
+
+        .btn {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
             font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
-        .btn-retro:active {
-            border: 2px solid #404040;
-            border-right-color: #fff;
-            border-bottom-color: #fff;
+        .btn:active { transform: scale(0.96); }
+
+        .btn-primary {
+            background: #007AFF;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
         }
+        .btn-secondary {
+            background: rgba(0,0,0,0.05);
+            color: #333;
+        }
+        .btn-secondary:hover { background: rgba(0,0,0,0.1); }
+        .btn-danger { color: #FF3B30; background: rgba(255, 59, 48, 0.1); }
+        .btn-text { background: transparent; color: #555; }
+
     </style>
 </head>
 <body>
 
+    <div class="backdrop-overlay"></div>
+
     <div id="main-menu-bar">
-        <div class="menu-item" onclick="openSalesWindow()">1.銷貨</div>
-        <div class="menu-item">2.進貨</div>
-        <div class="menu-item">3.結帳</div>
-        <div class="menu-item">4.標籤</div>
-        <div class="menu-item">5.商品</div>
-        <div class="menu-item">6.客戶</div>
-        <div class="menu-item">7.廠商</div>
-        <div class="menu-item">8.其它資料</div>
-        <div class="menu-item">9.備份</div>
-        <div class="menu-item">0.退出</div>
+        <div class="menu-item active" onclick="openSalesWindow()">🛍️ 銷貨</div>
+        <div class="menu-item">🚚 進貨</div>
+        <div class="menu-item">💰 結帳</div>
+        <div class="menu-item">📦 庫存</div>
+        <div class="menu-item">👥 客戶</div>
+        <div class="menu-item">⚙️ 設定</div>
     </div>
 
     <div id="sales-window">
-        <div class="window-title">
-            <span>🔴 門市現銷作業</span>
-            <div class="close-btn" onclick="closeSalesWindow()">X</div>
+        <div class="window-header">
+            <div class="window-title">門市銷貨作業</div>
+            <div class="close-btn" onclick="closeSalesWindow()">✕</div>
         </div>
 
-        <div class="header-section">
-            <div class="info-left">
-                <div class="form-row">
-                    <span class="form-label">編號：</span>
-                    <input type="text" value="S2026020301" disabled style="width: 120px; background:#eee;">
-                    <span class="form-label">日期：</span>
-                    <input type="date" id="order-date" value="2026-02-03">
+        <div class="window-content">
+            <div class="form-grid">
+                <div class="left-form">
+                    <div class="input-group">
+                        <input type="text" value="S2026020301" disabled style="width: 140px; color:#007AFF; font-weight:bold;">
+                        <input type="date" id="order-date" value="2026-02-03">
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="customer-code" placeholder="客戶代號 (掃描)" style="width: 120px;">
+                        <input type="text" value="門市現銷 (預設)" disabled style="flex-grow:1;">
+                    </div>
                 </div>
-                <div class="form-row">
-                    <span class="form-label">客戶：</span>
-                    <input type="text" id="customer-code" placeholder="輸入代號或掃描" style="width: 100px;">
-                    <input type="text" value="門市現銷" disabled style="width: 150px; background:#eee;">
+
+                <div class="total-card">
+                    <div class="total-label">訂單總金額</div>
+                    <div class="total-amount" id="big-total-display">$0</div>
                 </div>
             </div>
-            
-            <div class="big-total-box">
-                <span class="big-total-label">總金額</span>
-                <span id="big-total-display">0</span>
+
+            <div class="table-wrapper">
+                <table id="order-table">
+                    <thead>
+                        <tr>
+                            <th width="50">No.</th>
+                            <th width="150">商品代號</th>
+                            <th width="120">車種</th>
+                            <th>商品名稱</th>
+                            <th width="80">數量</th>
+                            <th width="100">單價</th>
+                            <th width="120">金額</th>
+                            <th width="50"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-list">
+                        </tbody>
+                </table>
             </div>
         </div>
 
-        <div class="table-container">
-            <table id="order-table">
-                <thead>
-                    <tr>
-                        <th style="width: 40px;">序</th>
-                        <th>商品代號</th>
-                        <th>車種</th>
-                        <th>商品名稱</th>
-                        <th style="width: 60px;">數量</th>
-                        <th style="width: 80px;">單價</th>
-                        <th style="width: 100px;">金額</th>
-                        <th>備註</th>
-                        <th style="width: 50px;">操作</th>
-                    </tr>
-                </thead>
-                <tbody id="order-list">
-                    </tbody>
-            </table>
-        </div>
-
-        <div class="footer-section">
-            <button class="btn-retro" onclick="addNewRow()">I.插入一行</button>
-            <button class="btn-retro">E.修改</button>
-            <button class="btn-retro">K.刪除</button>
-            <div style="flex-grow:1;"></div> <select style="height: 28px;">
-                <option>Microsoft Print to PDF</option>
-            </select>
-            <button class="btn-retro" onclick="saveOrder(true)">P.存檔+印表</button>
-            <button class="btn-retro" onclick="saveOrder(false)">G.存檔</button>
-            <button class="btn-retro" onclick="closeSalesWindow()">Q.退出</button>
+        <div class="action-bar">
+            <button class="btn btn-secondary" onclick="addNewRow()">+ 新增商品</button>
+            <div class="spacer"></div>
+            <button class="btn btn-text" onclick="closeSalesWindow()">取消</button>
+            <button class="btn btn-secondary" onclick="saveOrder(true)">🖨️ 存檔並列印</button>
+            <button class="btn btn-primary" onclick="saveOrder(false)">確認結帳</button>
         </div>
     </div>
 
     <script src="script.js"></script>
 
     <script>
-        // === 介面切換邏輯 ===
-        
-        // 打開銷貨視窗
+        // === 介面控制 ===
         function openSalesWindow() {
-            document.getElementById('sales-window').style.display = 'block';
-            // 自動聚焦到客戶代號，方便直接掃描
+            const win = document.getElementById('sales-window');
+            win.style.display = 'flex';
             document.getElementById('customer-code').focus();
-            // 預設日期
             document.getElementById('order-date').valueAsDate = new Date();
         }
 
-        // 關閉銷貨視窗
         function closeSalesWindow() {
             document.getElementById('sales-window').style.display = 'none';
         }
 
-        // 監聽鍵盤快捷鍵 (Q退出, I插入)
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'q' || event.key === 'Q') {
-                closeSalesWindow(); // 按 Q 退出
-            }
-            if (event.key === 'i' || event.key === 'I') {
-                addNewRow(); // 按 I 插入一行
-            }
-        });
-        
-        // 為了讓舊的 script.js 能運作，我們需要確保新增行的時候更新總金額
-        // 這裡做一個簡單的攔截器
-        const originalUpdateTotal = window.updateTotal; // 假設 script.js 裡有這個
-        // 如果 script.js 裡有更新總金額的函式，我們把它跟大藍色數字連動
+        // 連動大數字
         function updateBigTotalDisplay(amount) {
-            document.getElementById('big-total-display').innerText = amount;
+            // 格式化金額 (加上千分位逗號)
+            document.getElementById('big-total-display').innerText = '$' + amount.toLocaleString();
         }
-        
+
+        // 複寫 script.js 的計算函式來更新大數字
+        const originalCalculateTotal = window.calculateTotal;
+        window.calculateTotal = function() {
+            let grandTotal = 0;
+            document.querySelectorAll(".p-total").forEach(span => {
+                grandTotal += parseFloat(span.innerText) || 0;
+            });
+            document.getElementById("big-total-display").innerText = '$' + grandTotal.toLocaleString();
+        }
     </script>
 </body>
 </html>
