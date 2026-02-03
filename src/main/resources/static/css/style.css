@@ -1,0 +1,40 @@
+/* 全局設定 */
+body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+.container { width: 95%; margin: 20px auto; background: #fff; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+
+/* 1. 導覽列 */
+.top-nav { background-color: #333; overflow: hidden; padding: 0 10px; }
+.top-nav a { float: left; display: block; color: white; text-align: center; padding: 14px 20px; text-decoration: none; font-size: 16px; }
+.top-nav a:hover { background-color: #ddd; color: black; }
+.top-nav a.active { background-color: #04AA6D; color: white; }
+
+/* 2. 搜尋框 */
+.search-frame { background: #e8f0fe; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc; }
+
+/* 3. 單頭佈局 */
+.order-header { margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+.order-header .row { display: flex; gap: 15px; flex-wrap: wrap; }
+.order-header .col { display: flex; flex-direction: column; }
+.order-header .col.wide { flex: 2; }
+.order-header label { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+.order-header input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+
+/* 4. 表格樣式 */
+table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+th { background-color: #2196F3; color: white; padding: 10px; text-align: left; font-size: 14px; }
+td { padding: 5px; border-bottom: 1px solid #ddd; }
+td input { width: 90%; padding: 5px; border: 1px solid #ddd; }
+td input.amount { background-color: #f9f9f9; border: none; font-weight: bold; }
+
+/* 5. 按鈕樣式 */
+button { cursor: pointer; padding: 8px 15px; border: none; border-radius: 4px; }
+.btn-add { background-color: #eee; color: #333; border: 1px dashed #999; width: 100%; margin-bottom: 20px; }
+.btn-del { background-color: #ff4d4d; color: white; padding: 5px 10px; font-size: 12px; }
+
+/* 6. 底部操作區 */
+.order-footer { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #eee; padding-top: 15px; }
+.btn-action { font-size: 16px; margin-left: 5px; padding: 10px 20px; color: white; }
+.btn-save { background-color: #28a745; }
+.btn-save-print { background-color: #17a2b8; }
+.btn-delete { background-color: #dc3545; }
+.btn-exit { background-color: #6c757d; }

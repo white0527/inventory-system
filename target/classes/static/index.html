@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>進銷存系統 - 祥易機車材料行</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+        
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .history-table th, .history-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .history-table th { background-color: #f2f2f2; font-weight: bold; }
+        .history-table tr:hover { background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <a href="#" class="nav-btn active" onclick="switchView('sales')">銷貨 (新增訂單)</a>
+            <a href="#" class="nav-btn" onclick="switchView('history')">📜 歷史查詢</a>
+            <a href="#" class="nav-btn" onclick="switchView('products')">📦 商品匯入 (Excel)</a>
+            <a href="#" class="nav-btn">進貨</a>
+            <a href="#" class="nav-btn">退出</a>
+        </nav>
+    </header>
+
+    <div id="view-sales" class="view-section active">
+        <div class="container">
+            <div class="search-bar">
+                <label>🔍 搜尋商品/客戶：</label>
+                <input type="text" placeholder="輸入關鍵字...">
+                <button>搜尋</button>
+            </div>
+
+            <div class="order-header">
+                <div class="form-group">
+                    <label>日期：</label>
+                    <input type="date" id="order_date">
+                </div>
+                <div class="form-group">
+                    <label>客戶代號：</label>
+                    <input type="text" id="customer_id" placeholder="輸入代號">
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label>地址：</label>
+                    <input type="text" id="customer_address" placeholder="自動帶入地址">
+                </div>
+                <div class="form-group">
+                    <label>單號：</label>
+                    <input type="text" placeholder="自動生成" disabled>
+                </div>
+            </div>
+
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th>商品代號</th>
+                        <th>車種</th>
+                        <th>商品名稱</th>
+                        <th>儲位</th>
+                        <th>數量</th>
+                        <th>單價</th>
+                        <th>金額</th>
+                        <th>備註</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="order-items-body"></tbody>
+            </table>
+
+            <button class="add-row-btn" onclick="addRow()">+ 插入一行</button>
+
+            <div class="footer-actions">
+                <div class="creator-info">
+                    <label>製表人：</label>
+                    <input type="text" id="creator" value="管理員">
+                </div>
+                <div class="action-buttons">
+                    <button class="btn-blue">存檔+印表</button>
+                    <button class="btn-green" onclick="saveOrder()">存檔</button>
+                    <button class="btn-red">刪除</button>
+                    <button class="btn-gray">退出</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-history" class="view-section">
+        <div class="container">
+            <h2>📜 歷史訂單列表</h2>
+            <button class="btn-blue" onclick="loadHistory()">🔄 重新整理列表</button>
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>訂單編號</th>
+                        <th>日期</th>
+                        <th>客戶代號</th>
+                        <th>地址</th>
+                        <th>經手人</th>
+                    </tr>
+                </thead>
+                <tbody id="history-list-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="view-products" class="view-section">
+        <div class="container">
+            <h2>📦 商品資料管理 (Excel 匯入)</h2>
+            <div style="background: #eef; padding: 20px; border-radius: 8px;">
+                <h3>📥 Excel 批次匯入</h3>
+                <p>請上傳 `.xlsx` 檔案，欄位順序：<b>代號 | 名稱 | 車種 | 單價</b></p>
+                <input type="file" id="excelFile" accept=".xlsx">
+                <button class="btn-green" onclick="uploadExcel()">開始匯入</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
