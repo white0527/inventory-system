@@ -1,151 +1,137 @@
+// src/main/resources/static/script.js
+
+let orderItems = [];
+
+// 初始化：自動插入第一行
 document.addEventListener("DOMContentLoaded", () => {
-    addRow();
-    document.getElementById("order_date").valueAsDate = new Date();
+    addNewRow();
 });
 
-// 切換分頁
-function switchView(viewName) {
-    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+// 新增一行
+function addNewRow() {
+    const tableBody = document.getElementById("order-list");
+    const row = document.createElement("tr");
+    
+    // 序號 (自動計算)
+    const index = tableBody.children.length + 1;
 
-    if (viewName === 'sales') {
-        document.getElementById('view-sales').classList.add('active');
-    } else if (viewName === 'history') {
-        document.getElementById('view-history').classList.add('active');
-        loadHistory();
-    } else if (viewName === 'products') {
-        document.getElementById('view-products').classList.add('active');
+    row.innerHTML = `
+        <td style="text-align:center;">${index}</td>
+        <td><input type="text" class="p-code" onchange="searchProduct(this)" placeholder="掃描或輸入"></td>
+        <td><span class="p-car"></span></td>
+        <td><span class="p-name"></span></td>
+        <td><input type="number" class="p-qty" value="1" onchange="calculateRow(this)" style="width:50px;"></td>
+        <td><input type="number" class="p-price" value="0" onchange="calculateRow(this)" style="width:70px;"></td>
+        <td><span class="p-total">0</span></td>
+        <td><input type="text" class="p-note"></td>
+        <td><button onclick="removeRow(this)" style="color:red;">X</button></td>
+    `;
+    tableBody.appendChild(row);
+    
+    // 自動聚焦到新行的商品代號
+    row.querySelector(".p-code").focus();
+}
+
+// 移除行
+function removeRow(btn) {
+    const row = btn.parentElement.parentElement;
+    row.remove();
+    calculateTotal(); // 重新計算總額
+}
+
+// 搜尋商品 (模擬) - 這裡對接後端
+async function searchProduct(inputElement) {
+    const code = inputElement.value;
+    const row = inputElement.parentElement.parentElement;
+
+    if (!code) return;
+
+    try {
+        // 呼叫後端 API
+        const response = await fetch(`/api/products/${code}`);
+        if (response.ok) {
+            const product = await response.json();
+            row.querySelector(".p-car").innerText = product.carType || ""; // 車種
+            row.querySelector(".p-name").innerText = product.name;         // 品名
+            row.querySelector(".p-price").value = product.price;           // 單價
+            calculateRow(inputElement); // 計算金額
+        } else {
+            alert("查無此商品！");
+            inputElement.value = "";
+        }
+    } catch (e) {
+        console.error("連線錯誤", e);
     }
 }
 
-// 匯入 Excel
-function uploadExcel() {
-    const fileInput = document.getElementById("excelFile");
-    const file = fileInput.files[0];
-    if (!file) { alert("請先選擇檔案！"); return; }
+// 計算單行金額
+function calculateRow(element) {
+    const row = element.parentElement.parentElement;
+    const qty = parseFloat(row.querySelector(".p-qty").value) || 0;
+    const price = parseFloat(row.querySelector(".p-price").value) || 0;
+    const total = qty * price;
+    
+    row.querySelector(".p-total").innerText = total;
+    calculateTotal();
+}
 
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const btn = document.querySelector("#view-products .btn-green");
-    btn.innerText = "⏳ 匯入中...";
-    btn.disabled = true;
-
-    fetch('/api/products/import', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(result => {
-        alert(result);
-        btn.innerText = "開始匯入";
-        btn.disabled = false;
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert("匯入失敗: " + error);
-        btn.innerText = "開始匯入";
-        btn.disabled = false;
+// 計算整張單總金額
+function calculateTotal() {
+    let grandTotal = 0;
+    document.querySelectorAll(".p-total").forEach(span => {
+        grandTotal += parseFloat(span.innerText) || 0;
     });
+    
+    // 更新右上方那個大大的藍色數字
+    document.getElementById("big-total-display").innerText = grandTotal;
 }
 
-// 載入歷史
-function loadHistory() {
-    const tbody = document.getElementById("history-list-body");
-    tbody.innerHTML = "<tr><td colspan='5'>⏳ 正在載入資料...</td></tr>";
-
-    fetch('/api/sales')
-        .then(response => response.json())
-        .then(data => {
-            tbody.innerHTML = "";
-            if (!data || data.length === 0) {
-                tbody.innerHTML = "<tr><td colspan='5'>沒有任何訂單資料</td></tr>";
-                return;
-            }
-            data.forEach(order => {
-                let dateStr = order.order_date;
-                if (dateStr && dateStr.includes('T')) dateStr = dateStr.split('T')[0];
-                
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${order.order_id}</td>
-                        <td>${dateStr}</td>
-                        <td>${order.customer_id || '-'}</td>
-                        <td>${order.customer_address || '-'}</td>
-                        <td>${order.creator || '-'}</td>
-                    </tr>`;
-            });
-        })
-        .catch(error => {
-            console.error(error);
-            tbody.innerHTML = `<tr><td colspan='5' style='color:red;'>載入失敗</td></tr>`;
-        });
-}
-
-// 增加表格行
-function addRow() {
-    const tbody = document.getElementById("order-items-body");
-    const row = document.createElement("tr");
-    row.innerHTML = `
-        <td><input type="text" name="product_id"></td>
-        <td><input type="text" name="car_type"></td>
-        <td><input type="text" name="product_name"></td>
-        <td><input type="text" name="location"></td>
-        <td><input type="number" name="quantity" value="1" style="width: 50px;" onchange="calculateRow(this)"></td>
-        <td><input type="number" name="price" value="0" style="width: 80px;" onchange="calculateRow(this)"></td>
-        <td><input type="number" name="amount" value="0" style="width: 80px;" readonly></td>
-        <td><input type="text" name="note"></td>
-        <td><button class="btn-red" onclick="removeRow(this)">刪除</button></td>
-    `;
-    tbody.appendChild(row);
-}
-
-function removeRow(btn) {
-    const row = btn.parentNode.parentNode;
-    row.parentNode.removeChild(row);
-}
-
-function calculateRow(input) {
-    const row = input.parentNode.parentNode;
-    const qty = row.querySelector('input[name="quantity"]').value;
-    const price = row.querySelector('input[name="price"]').value;
-    row.querySelector('input[name="amount"]').value = qty * price;
-}
-
-// 存檔訂單
-function saveOrder() {
+// 存檔
+async function saveOrder(print) {
+    const customerCode = document.getElementById("customer-code").value;
+    const date = document.getElementById("order-date").value;
     const items = [];
-    document.querySelectorAll("#order-items-body tr").forEach(row => {
-        const item = {
-            product_id: row.querySelector('input[name="product_id"]').value,
-            car_type: row.querySelector('input[name="car_type"]').value,
-            product_name: row.querySelector('input[name="product_name"]').value,
-            location: row.querySelector('input[name="location"]').value,
-            quantity: parseInt(row.querySelector('input[name="quantity"]').value) || 0,
-            price: parseInt(row.querySelector('input[name="price"]').value) || 0,
-            amount: parseInt(row.querySelector('input[name="amount"]').value) || 0,
-            note: row.querySelector('input[name="note"]').value
-        };
-        if(item.product_id || item.product_name) items.push(item);
+
+    document.querySelectorAll("#order-list tr").forEach(row => {
+        const code = row.querySelector(".p-code").value;
+        if (code) {
+            items.push({
+                productCode: code,
+                quantity: parseInt(row.querySelector(".p-qty").value),
+                price: parseFloat(row.querySelector(".p-price").value),
+                amount: parseFloat(row.querySelector(".p-total").innerText)
+            });
+        }
     });
 
-    const dataToSend = {
-        order_date: document.getElementById("order_date").value,
-        customer_id: document.getElementById("customer_id").value,
-        customer_address: document.getElementById("customer_address").value,
-        creator: document.getElementById("creator").value,
+    if (items.length === 0) {
+        alert("請至少輸入一項商品！");
+        return;
+    }
+
+    const orderData = {
+        customerCode: customerCode,
+        date: date,
         items: items
     };
 
-    fetch('/api/sales', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSend)
-    })
-    .then(r => r.json())
-    .then(d => {
-        if (d.success) alert("存檔成功！單號: " + d.orderId);
-        else alert("失敗: " + d.message);
-    })
-    .catch(e => alert("連線錯誤: " + e));
+    try {
+        const response = await fetch('/api/sales', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
+
+        if (response.ok) {
+            alert("✅ 存檔成功！");
+            if (print) {
+                window.print(); // 簡單呼叫瀏覽器列印
+            }
+            location.reload(); // 重新整理頁面
+        } else {
+            alert("❌ 存檔失敗！");
+        }
+    } catch (e) {
+        alert("連線錯誤：" + e);
+    }
 }

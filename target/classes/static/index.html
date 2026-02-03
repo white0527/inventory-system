@@ -1,124 +1,300 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>進銷存系統 - 祥易機車材料行</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>祥易機車材料進銷存</title>
     <style>
-        .view-section { display: none; }
-        .view-section.active { display: block; }
+        /* 全局設定：模仿傳統 Windows 軟體風格 */
+        body {
+            font-family: 'PMingLiU', 'MingLiU', sans-serif; /* 細明體比較像傳統軟體 */
+            background-color: #808080; /* 背景深灰，像應用程式桌面 */
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* === 第一層：頂部選單列 === */
+        #main-menu-bar {
+            background-color: #f0f0f0;
+            border-bottom: 2px solid #fff;
+            padding: 5px 10px;
+            display: flex;
+            gap: 15px;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .menu-item {
+            cursor: pointer;
+            padding: 2px 8px;
+            color: #000;
+            text-decoration: none;
+        }
+        .menu-item:hover {
+            background-color: #000080; /* 經典反白 */
+            color: #fff;
+        }
+
+        /* === 第二層：功能視窗 (門市現銷) === */
+        #sales-window {
+            display: none; /* 預設隱藏 */
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95%;
+            max-width: 1000px;
+            background-color: #d4d0c8; /* 經典 Windows 灰 */
+            border: 2px solid #fff;
+            border-right-color: #404040;
+            border-bottom-color: #404040;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+            padding: 5px;
+        }
+
+        /* 標題列 */
+        .window-title {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 5px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .close-btn {
+            background: #d4d0c8;
+            color: black;
+            border: 1px solid #fff;
+            border-right-color: #404040;
+            border-bottom-color: #404040;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 18px;
+            cursor: pointer;
+            font-family: Arial;
+        }
+
+        /* 上方資訊區 (表頭) */
+        .header-section {
+            display: grid;
+            grid-template-columns: 3fr 1fr; /* 左邊輸入，右邊大金額 */
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #808080;
+            margin-top: 5px;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px;
+            align-items: center;
+        }
+        .form-label {
+            width: 70px;
+            text-align: right;
+        }
+        input {
+            border: 2px inset #d4d0c8;
+            padding: 2px;
+            font-family: 'PMingLiU';
+        }
         
-        .history-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .history-table th, .history-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .history-table th { background-color: #f2f2f2; font-weight: bold; }
-        .history-table tr:hover { background-color: #f9f9f9; }
+        /* 右邊那個大大的總金額 */
+        .big-total-box {
+            background-color: #fff;
+            border: 2px inset #d4d0c8;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-end;
+            padding-right: 10px;
+        }
+        .big-total-label { font-size: 12px; }
+        #big-total-display {
+            font-size: 48px;
+            color: blue;
+            font-weight: bold;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+        }
+
+        /* === 核心：商品表格 (復古風格) === */
+        .table-container {
+            margin-top: 10px;
+            height: 300px;
+            overflow-y: auto;
+            background-color: #fff;
+            border: 2px inset #d4d0c8;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background-color: #00ffff; /* 經典青色表頭 */
+            color: black;
+            border: 1px solid #00ff00; /* 綠色框線 */
+            padding: 4px;
+            font-weight: normal;
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+        }
+        td {
+            border: 1px solid #00ff00; /* 綠色框線 */
+            padding: 4px;
+            color: black;
+            font-size: 14px;
+        }
+        /* 讓輸入框融入表格 */
+        td input {
+            width: 90%;
+            border: none;
+            outline: none;
+            background: transparent;
+        }
+
+        /* === 底部按鈕區 === */
+        .footer-section {
+            margin-top: 10px;
+            padding: 10px;
+            border-top: 1px solid #808080;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background-color: #d4d0c8;
+        }
+        .btn-retro {
+            background-color: #d4d0c8;
+            border: 2px solid #fff;
+            border-right-color: #404040;
+            border-bottom-color: #404040;
+            padding: 5px 15px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-retro:active {
+            border: 2px solid #404040;
+            border-right-color: #fff;
+            border-bottom-color: #fff;
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <nav>
-            <a href="#" class="nav-btn active" onclick="switchView('sales')">銷貨 (新增訂單)</a>
-            <a href="#" class="nav-btn" onclick="switchView('history')">📜 歷史查詢</a>
-            <a href="#" class="nav-btn" onclick="switchView('products')">📦 商品匯入 (Excel)</a>
-            <a href="#" class="nav-btn">進貨</a>
-            <a href="#" class="nav-btn">退出</a>
-        </nav>
-    </header>
+    <div id="main-menu-bar">
+        <div class="menu-item" onclick="openSalesWindow()">1.銷貨</div>
+        <div class="menu-item">2.進貨</div>
+        <div class="menu-item">3.結帳</div>
+        <div class="menu-item">4.標籤</div>
+        <div class="menu-item">5.商品</div>
+        <div class="menu-item">6.客戶</div>
+        <div class="menu-item">7.廠商</div>
+        <div class="menu-item">8.其它資料</div>
+        <div class="menu-item">9.備份</div>
+        <div class="menu-item">0.退出</div>
+    </div>
 
-    <div id="view-sales" class="view-section active">
-        <div class="container">
-            <div class="search-bar">
-                <label>🔍 搜尋商品/客戶：</label>
-                <input type="text" placeholder="輸入關鍵字...">
-                <button>搜尋</button>
-            </div>
+    <div id="sales-window">
+        <div class="window-title">
+            <span>🔴 門市現銷作業</span>
+            <div class="close-btn" onclick="closeSalesWindow()">X</div>
+        </div>
 
-            <div class="order-header">
-                <div class="form-group">
-                    <label>日期：</label>
-                    <input type="date" id="order_date">
+        <div class="header-section">
+            <div class="info-left">
+                <div class="form-row">
+                    <span class="form-label">編號：</span>
+                    <input type="text" value="S2026020301" disabled style="width: 120px; background:#eee;">
+                    <span class="form-label">日期：</span>
+                    <input type="date" id="order-date" value="2026-02-03">
                 </div>
-                <div class="form-group">
-                    <label>客戶代號：</label>
-                    <input type="text" id="customer_id" placeholder="輸入代號">
-                </div>
-                <div class="form-group" style="flex: 2;">
-                    <label>地址：</label>
-                    <input type="text" id="customer_address" placeholder="自動帶入地址">
-                </div>
-                <div class="form-group">
-                    <label>單號：</label>
-                    <input type="text" placeholder="自動生成" disabled>
+                <div class="form-row">
+                    <span class="form-label">客戶：</span>
+                    <input type="text" id="customer-code" placeholder="輸入代號或掃描" style="width: 100px;">
+                    <input type="text" value="門市現銷" disabled style="width: 150px; background:#eee;">
                 </div>
             </div>
+            
+            <div class="big-total-box">
+                <span class="big-total-label">總金額</span>
+                <span id="big-total-display">0</span>
+            </div>
+        </div>
 
-            <table class="order-table">
+        <div class="table-container">
+            <table id="order-table">
                 <thead>
                     <tr>
+                        <th style="width: 40px;">序</th>
                         <th>商品代號</th>
                         <th>車種</th>
                         <th>商品名稱</th>
-                        <th>儲位</th>
-                        <th>數量</th>
-                        <th>單價</th>
-                        <th>金額</th>
+                        <th style="width: 60px;">數量</th>
+                        <th style="width: 80px;">單價</th>
+                        <th style="width: 100px;">金額</th>
                         <th>備註</th>
-                        <th>操作</th>
+                        <th style="width: 50px;">操作</th>
                     </tr>
                 </thead>
-                <tbody id="order-items-body"></tbody>
-            </table>
-
-            <button class="add-row-btn" onclick="addRow()">+ 插入一行</button>
-
-            <div class="footer-actions">
-                <div class="creator-info">
-                    <label>製表人：</label>
-                    <input type="text" id="creator" value="管理員">
-                </div>
-                <div class="action-buttons">
-                    <button class="btn-blue">存檔+印表</button>
-                    <button class="btn-green" onclick="saveOrder()">存檔</button>
-                    <button class="btn-red">刪除</button>
-                    <button class="btn-gray">退出</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="view-history" class="view-section">
-        <div class="container">
-            <h2>📜 歷史訂單列表</h2>
-            <button class="btn-blue" onclick="loadHistory()">🔄 重新整理列表</button>
-            <table class="history-table">
-                <thead>
-                    <tr>
-                        <th>訂單編號</th>
-                        <th>日期</th>
-                        <th>客戶代號</th>
-                        <th>地址</th>
-                        <th>經手人</th>
-                    </tr>
-                </thead>
-                <tbody id="history-list-body"></tbody>
+                <tbody id="order-list">
+                    </tbody>
             </table>
         </div>
-    </div>
 
-    <div id="view-products" class="view-section">
-        <div class="container">
-            <h2>📦 商品資料管理 (Excel 匯入)</h2>
-            <div style="background: #eef; padding: 20px; border-radius: 8px;">
-                <h3>📥 Excel 批次匯入</h3>
-                <p>請上傳 `.xlsx` 檔案，欄位順序：<b>代號 | 名稱 | 車種 | 單價</b></p>
-                <input type="file" id="excelFile" accept=".xlsx">
-                <button class="btn-green" onclick="uploadExcel()">開始匯入</button>
-            </div>
+        <div class="footer-section">
+            <button class="btn-retro" onclick="addNewRow()">I.插入一行</button>
+            <button class="btn-retro">E.修改</button>
+            <button class="btn-retro">K.刪除</button>
+            <div style="flex-grow:1;"></div> <select style="height: 28px;">
+                <option>Microsoft Print to PDF</option>
+            </select>
+            <button class="btn-retro" onclick="saveOrder(true)">P.存檔+印表</button>
+            <button class="btn-retro" onclick="saveOrder(false)">G.存檔</button>
+            <button class="btn-retro" onclick="closeSalesWindow()">Q.退出</button>
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+    <script src="script.js"></script>
+
+    <script>
+        // === 介面切換邏輯 ===
+        
+        // 打開銷貨視窗
+        function openSalesWindow() {
+            document.getElementById('sales-window').style.display = 'block';
+            // 自動聚焦到客戶代號，方便直接掃描
+            document.getElementById('customer-code').focus();
+            // 預設日期
+            document.getElementById('order-date').valueAsDate = new Date();
+        }
+
+        // 關閉銷貨視窗
+        function closeSalesWindow() {
+            document.getElementById('sales-window').style.display = 'none';
+        }
+
+        // 監聽鍵盤快捷鍵 (Q退出, I插入)
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'q' || event.key === 'Q') {
+                closeSalesWindow(); // 按 Q 退出
+            }
+            if (event.key === 'i' || event.key === 'I') {
+                addNewRow(); // 按 I 插入一行
+            }
+        });
+        
+        // 為了讓舊的 script.js 能運作，我們需要確保新增行的時候更新總金額
+        // 這裡做一個簡單的攔截器
+        const originalUpdateTotal = window.updateTotal; // 假設 script.js 裡有這個
+        // 如果 script.js 裡有更新總金額的函式，我們把它跟大藍色數字連動
+        function updateBigTotalDisplay(amount) {
+            document.getElementById('big-total-display').innerText = amount;
+        }
+        
+    </script>
 </body>
 </html>
