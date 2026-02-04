@@ -2,17 +2,17 @@ package com.example.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
-// 排除資料庫自動設定，只跑 API
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+@SpringBootApplication
 public class DemoApplication {
 
     public static void main(String[] args) {
-        System.out.println("🚀 啟動 API 模式：正在啟動...");
-        // 修正語法錯誤，移除多餘文字
+        // 這是新的啟動訊息，代表我們改用設定檔了
+        System.out.println("🚀 祥易系統啟動中... (正在讀取 application.properties)");
+        
         SpringApplication.run(DemoApplication.class, args);
-        System.out.println("✅ 系統已啟動 (API Mode)!");
-        System.out.println("👉 請訪問: http://localhost:8080/");
+        
+        System.out.println("✅ 系統已啟動成功!");
+        System.out.println("👉 請開啟網頁: http://localhost:8080/");
     }
-} 
+}

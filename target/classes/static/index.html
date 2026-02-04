@@ -3,366 +3,558 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>祥易機車材料 - 未來雲端版</title>
+    <title>祥易機車材料 - 專業全能版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* === 全局設定：iOS 未來風格 === */
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --primary-color: #007AFF; /* iOS Blue */
-            --danger-color: #FF3B30; /* iOS Red */
-            --text-color: #1d1d1f;
-            --radius-large: 24px;
-            --radius-medium: 16px;
-            --radius-small: 10px;
+            /* === 核心配色 === */
+            --primary-color: #3b82f6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --text-dark: #1e293b;
+            
+            /* === 玻璃材質與陰影 === */
+            --glass-bg: rgba(255, 255, 255, 0.95); 
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --grid-line: #cbd5e1;
+            --shadow-float: 0 10px 40px rgba(0, 0, 0, 0.15);
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
             margin: 0;
             padding: 0;
-            height: 100vh;
-            overflow: hidden;
-            color: var(--text-color);
-            /* 背景：動態流體漸層 */
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop'); 
-            background-size: cover;
-            background-position: center;
-        }
-
-        /* 遮罩層 (讓背景稍微暗一點，凸顯玻璃) */
-        .backdrop-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            z-index: -1;
-        }
-
-        /* === 第一層：頂部懸浮 Dock === */
-        #main-menu-bar {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 10px 20px;
-            border-radius: 100px; /* 膠囊狀 */
             display: flex;
-            gap: 8px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--glass-border);
-            z-index: 100;
-            transition: all 0.3s ease;
+            height: 100vh;
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            overflow: hidden;
+            color: var(--text-dark);
         }
 
-        .menu-item {
-            cursor: pointer;
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-size: 15px;
-            font-weight: 500;
-            color: #555;
-            transition: all 0.2s ease;
-        }
-
-        .menu-item:hover {
-            background: rgba(0, 0, 0, 0.05);
-            color: #000;
-            transform: scale(1.05);
-        }
-        
-        .menu-item.active {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
-        }
-
-        /* === 第二層：玻璃擬態視窗 === */
-        #sales-window {
-            display: none; /* 預設隱藏 */
-            position: absolute;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 1100px;
-            height: 80vh;
-            
-            /* 核心玻璃效果 */
-            background: var(--glass-bg);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-radius: var(--radius-large);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-            
+        /* === 左側選單 === */
+        .sidebar {
+            width: 200px;
+            background: #1e293b;
+            color: #f1f5f9;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            animation: popIn 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 20;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         }
-
-        @keyframes popIn {
-            0% { opacity: 0; transform: translate(-50%, 20px) scale(0.95); }
-            100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-        }
-
-        /* 視窗標題列 */
-        .window-header {
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-        .window-title {
-            font-size: 22px;
-            font-weight: 700;
-            background: linear-gradient(90deg, #007AFF, #5AC8FA);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .close-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.05);
+        .logo-area {
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: 0.2s;
-            color: #666;
             font-weight: bold;
+            font-size: 16px;
+            background: rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .close-btn:hover { background: rgba(0,0,0,0.1); color: #000; }
+        .nav-menu { padding: 10px 0; list-style: none; margin: 0; overflow-y: auto; }
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s;
+            font-size: 14px;
+            border-left: 4px solid transparent;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .nav-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border-left-color: #3b82f6;
+        }
+        .nav-item i { width: 20px; text-align: center; }
 
-        /* 內容區 */
-        .window-content {
-            padding: 20px 30px;
+        /* === 右側主畫面 === */
+        .main-content {
             flex-grow: 1;
-            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            overflow: hidden;
         }
 
-        /* 表單區域 */
-        .form-grid {
-            display: grid;
-            grid-template-columns: 3fr 1fr;
-            gap: 20px;
-        }
-        .input-group {
+        /* === 頂部功能導航列 === */
+        .top-bar {
+            height: 50px;
+            background: rgba(255,255,255,0.8);
+            border-bottom: 1px solid var(--glass-border);
             display: flex;
-            gap: 15px;
             align-items: center;
-            margin-bottom: 15px;
+            padding: 0 15px;
+            gap: 8px;
+            overflow-x: visible; 
+            z-index: 50;
+        }
+
+        .top-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+            background: rgba(255,255,255,0.6);
+            white-space: nowrap;
+        }
+        .top-pill:hover { background: #eff6ff; color: var(--primary-color); }
+        .top-pill.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
+        }
+
+        /* 下拉選單 */
+        .dropdown-wrapper { position: relative; display: inline-block; }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 110%;
+            left: 0;
+            min-width: 200px;
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: var(--shadow-float);
+            padding: 5px;
+            z-index: 100;
+        }
+        .dropdown-wrapper.open .dropdown-menu { display: block; }
+        .dropdown-item {
+            display: block; padding: 8px 12px; color: #334155; font-size: 13px;
+            border-radius: 5px; cursor: pointer;
+        }
+        .dropdown-item:hover { background: #eff6ff; color: var(--primary-color); }
+        .dropdown-divider { height: 1px; background: #e2e8f0; margin: 4px 0; }
+
+        /* === 工作區 === */
+        .workspace {
+            padding: 10px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .panel-box {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        /* [上] 單頭 - 兩列佈局 */
+        .form-header {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .header-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
             flex-wrap: wrap;
         }
-        
-        /* iOS 風格輸入框 */
-        input {
-            background: rgba(255, 255, 255, 0.5);
-            border: none;
-            padding: 10px 15px;
-            border-radius: var(--radius-small);
-            font-size: 15px;
-            color: #333;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-            transition: 0.2s;
-            outline: none;
+        .form-group { display: flex; align-items: center; gap: 8px; }
+        label { font-weight: bold; font-size: 14px; color: #475569; white-space: nowrap; }
+        input.header-input {
+            padding: 5px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 130px;
         }
-        input:focus {
-            background: #fff;
-            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.3);
-        }
-        input:disabled { background: rgba(0,0,0,0.03); color: #888; }
+        input.addr-input { width: 400px; } /* 地址欄位加長 */
+        input.name-input { width: 180px; } /* 客戶名稱欄位 */
 
-        /* 總金額顯示 (像股票 APP) */
-        .total-card {
-            background: linear-gradient(135deg, #007AFF 0%, #0055b3 100%);
-            color: white;
-            border-radius: var(--radius-medium);
-            padding: 15px;
-            text-align: right;
-            box-shadow: 0 10px 20px rgba(0, 122, 255, 0.25);
-        }
-        .total-label { font-size: 13px; opacity: 0.8; }
-        .total-amount { font-size: 32px; font-weight: 700; letter-spacing: -1px; }
-
-        /* 表格區 */
-        .table-wrapper {
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: var(--radius-medium);
-            overflow: hidden;
+        /* [中] 表格 */
+        .grid-wrapper {
             flex-grow: 1;
-            border: 1px solid rgba(255,255,255,0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--grid-line);
+            background: #fff;
         }
-        table { width: 100%; border-collapse: collapse; }
+        .grid-container { flex-grow: 1; overflow: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
         th {
-            text-align: left;
-            padding: 12px 15px;
-            font-size: 13px;
-            color: #666;
-            font-weight: 600;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            background: rgba(255,255,255,0.3);
+            background: #eff6ff; color: #1e3a8a; padding: 8px 5px;
+            border: 1px solid var(--grid-line); position: sticky; top: 0; z-index: 5;
+            text-align: center; font-size: 13px; white-space: nowrap;
         }
         td {
-            padding: 8px 15px;
-            border-bottom: 1px solid rgba(0,0,0,0.03);
-            font-size: 15px;
+            border: 1px solid var(--grid-line); padding: 0; height: 30px;
+            font-size: 14px; color: #334155;
         }
-        /* 表格內的輸入框要透明一點 */
-        td input { background: transparent; box-shadow: none; padding: 5px; width: 100%; }
-        td input:focus { background: white; }
+        td input {
+            width: 100%; height: 100%; border: none; background: transparent;
+            padding: 0 5px; outline: none; text-align: center;
+        }
+        td input:focus { background: #fff; box-shadow: inset 0 0 0 2px var(--primary-color); }
+        tr:nth-child(even) td { background: #f8fafc; }
+        .price-col { background: #f0fdf4 !important; }
 
-        /* 底部按鈕區 */
-        .action-bar {
-            padding: 15px 30px;
-            background: rgba(255,255,255,0.3);
-            border-top: 1px solid rgba(0,0,0,0.05);
+        /* [下] 單尾 */
+        .footer-bar {
             display: flex;
-            gap: 12px;
+            justify-content: space-between;
             align-items: center;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 10px;
         }
-        
-        .spacer { flex-grow: 1; }
-
+        .btn-group { display: flex; gap: 8px; }
         .btn {
-            border: none;
-            padding: 10px 20px;
-            border-radius: 30px;
+            padding: 6px 16px;
+            border-radius: 4px;
+            border: 1px solid transparent;
             font-size: 14px;
-            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            font-weight: 500;
+            display: flex; align-items: center; gap: 5px; transition: 0.2s;
         }
-        .btn:active { transform: scale(0.96); }
+        /* 按鈕顏色 */
+        .btn-blue { background: #e0f2fe; color: #0284c7; border-color: #bae6fd; }
+        .btn-blue:hover { background: #0284c7; color: white; }
+        .btn-green { background: #dcfce7; color: #16a34a; border-color: #bbf7d0; }
+        .btn-green:hover { background: #16a34a; color: white; }
+        .btn-red { background: #fee2e2; color: #dc2626; border-color: #fecaca; }
+        .btn-red:hover { background: #dc2626; color: white; }
+        .btn-gray { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+        .btn-gray:hover { background: #475569; color: white; }
 
-        .btn-primary {
-            background: #007AFF;
-            color: white;
-            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
-        }
-        .btn-secondary {
-            background: rgba(0,0,0,0.05);
-            color: #333;
-        }
-        .btn-secondary:hover { background: rgba(0,0,0,0.1); }
-        .btn-danger { color: #FF3B30; background: rgba(255, 59, 48, 0.1); }
-        .btn-text { background: transparent; color: #555; }
-
+        .price-select { border: none; background: transparent; font-weight: bold; color: #16a34a; cursor: pointer; outline: none; }
     </style>
 </head>
 <body>
 
-    <div class="backdrop-overlay"></div>
-
-    <div id="main-menu-bar">
-        <div class="menu-item active" onclick="openSalesWindow()">🛍️ 銷貨</div>
-        <div class="menu-item">🚚 進貨</div>
-        <div class="menu-item">💰 結帳</div>
-        <div class="menu-item">📦 庫存</div>
-        <div class="menu-item">👥 客戶</div>
-        <div class="menu-item">⚙️ 設定</div>
+    <div class="sidebar">
+        <div class="logo-area">祥易機車材料</div>
+        <ul class="nav-menu">
+            <li class="nav-item active"><i class="fas fa-cash-register"></i> 1. 銷貨</li>
+            <li class="nav-item"><i class="fas fa-truck-loading"></i> 2. 進貨</li>
+            <li class="nav-item"><i class="fas fa-file-invoice-dollar"></i> 3. 結帳</li>
+            <li class="nav-item"><i class="fas fa-tags"></i> 4. 標籤</li>
+            <li class="nav-item"><i class="fas fa-boxes"></i> 5. 商品</li>
+            <li class="nav-item"><i class="fas fa-users"></i> 6. 客戶</li>
+            <li class="nav-item"><i class="fas fa-industry"></i> 7. 廠商</li>
+            <li class="nav-item"><i class="fas fa-folder-open"></i> 8. 其他資料</li>
+            <li class="nav-item"><i class="fas fa-database"></i> 9. 備份</li>
+            <li class="nav-item"><i class="fas fa-sign-out-alt"></i> 0. 退出</li>
+        </ul>
     </div>
 
-    <div id="sales-window">
-        <div class="window-header">
-            <div class="window-title">門市銷貨作業</div>
-            <div class="close-btn" onclick="closeSalesWindow()">✕</div>
-        </div>
+    <div class="main-content">
+        
+        <div class="top-bar" id="sales-top-menu">
+            <div class="top-pill active" onclick="switchSubTab(this, '0')">0. 門市現銷</div>
+            <div class="top-pill" onclick="switchSubTab(this, '1')">1. 銷貨登記</div>
+            <div class="top-pill" onclick="switchSubTab(this, '2')">2. 銷貨查詢</div>
+            <div class="top-pill" onclick="switchSubTab(this, '3')">3. 瀏覽式查詢</div>
+            
+            <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 5px;"></div>
 
-        <div class="window-content">
-            <div class="form-grid">
-                <div class="left-form">
-                    <div class="input-group">
-                        <input type="text" value="S2026020301" disabled style="width: 140px; color:#007AFF; font-weight:bold;">
-                        <input type="date" id="order-date" value="2026-02-03">
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="customer-code" placeholder="客戶代號 (掃描)" style="width: 120px;">
-                        <input type="text" value="門市現銷 (預設)" disabled style="flex-grow:1;">
-                    </div>
+            <div class="dropdown-wrapper" onclick="toggleDropdown(this)">
+                <div class="top-pill">
+                    A. 銷貨退貨 <i class="fas fa-chevron-down" style="margin-left:5px; font-size:10px;"></i>
                 </div>
-
-                <div class="total-card">
-                    <div class="total-label">訂單總金額</div>
-                    <div class="total-amount" id="big-total-display">$0</div>
+                <div class="dropdown-menu">
+                    <div class="dropdown-item" onclick="subAction('A-1')">1. 退貨登記</div>
+                    <div class="dropdown-item" onclick="subAction('A-2')">2. 退貨查詢</div>
+                    <div class="dropdown-item" onclick="subAction('A-3')">3. 瀏覽式退貨查詢</div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="subAction('A-4')">4. 退貨統計</div>
                 </div>
             </div>
 
-            <div class="table-wrapper">
-                <table id="order-table">
-                    <thead>
-                        <tr>
-                            <th width="50">No.</th>
-                            <th width="150">商品代號</th>
-                            <th width="120">車種</th>
-                            <th>商品名稱</th>
-                            <th width="80">數量</th>
-                            <th width="100">單價</th>
-                            <th width="120">金額</th>
-                            <th width="50"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="order-list">
-                        </tbody>
-                </table>
+            <div class="dropdown-wrapper" onclick="toggleDropdown(this)">
+                <div class="top-pill">
+                    B. 報價作業 <i class="fas fa-chevron-down" style="margin-left:5px; font-size:10px;"></i>
+                </div>
+                <div class="dropdown-menu">
+                    <div class="dropdown-item" onclick="subAction('B-1')">1. 報價登記</div>
+                    <div class="dropdown-item" onclick="subAction('B-2')">2. 報價查詢</div>
+                </div>
+            </div>
+
+             <div class="dropdown-wrapper" onclick="toggleDropdown(this)">
+                <div class="top-pill"><i class="fas fa-cog"></i> 其它設定</div>
+                <div class="dropdown-menu">
+                    <div class="dropdown-item">C. 設定出貨單格式</div>
+                    <div class="dropdown-item">D. 出貨單列印位置</div>
+                </div>
             </div>
         </div>
 
-        <div class="action-bar">
-            <button class="btn btn-secondary" onclick="addNewRow()">+ 新增商品</button>
-            <div class="spacer"></div>
-            <button class="btn btn-text" onclick="closeSalesWindow()">取消</button>
-            <button class="btn btn-secondary" onclick="saveOrder(true)">🖨️ 存檔並列印</button>
-            <button class="btn btn-primary" onclick="saveOrder(false)">確認結帳</button>
+        <div class="workspace">
+            
+            <div style="padding-left:5px; font-size:16px; font-weight:bold; color:var(--primary-color);">
+                <i class="fas fa-angle-right"></i> <span id="current-mode-title">門市現銷作業</span>
+            </div>
+
+            <div class="panel-box form-header">
+                <div class="header-row">
+                    <div class="form-group">
+                        <label>編號</label>
+                        <input type="text" class="header-input" value="自動生成" disabled style="background:#f1f5f9;">
+                    </div>
+                    <div class="form-group">
+                        <label>日期</label>
+                        <input type="date" class="header-input" id="sales-date">
+                    </div>
+                    <div class="form-group" style="background: #fffbeb; padding: 2px 5px; border-radius: 4px; border: 1px solid #fcd34d;">
+                        <label>帳款月份</label>
+                        <input type="month" class="header-input" id="billing-month">
+                    </div>
+                </div>
+
+                <div class="header-row">
+                    <div class="form-group">
+                        <label>客戶代號</label>
+                        <input type="text" class="header-input" id="sales-cust" placeholder="代號/掃描">
+                    </div>
+                    <div class="form-group">
+                        <label>客戶名稱</label>
+                        <input type="text" class="header-input name-input" id="sales-cust-name" placeholder="自動帶出名稱">
+                    </div>
+                    <div class="form-group">
+                        <label>客戶地址</label>
+                        <input type="text" class="header-input addr-input" id="sales-addr" placeholder="送貨地址">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-wrapper panel-box">
+                <div class="grid-container">
+                    <table id="sales-table">
+                        <thead>
+                            <tr>
+                                <th width="40">序</th>
+                                <th width="120" style="color:#ef4444;">商品代號</th>
+                                <th width="100">車種</th>
+                                <th>商品名稱</th>
+                                <th width="60">數量</th>
+                                <th width="80">單價</th>
+                                <th width="120" class="price-col">
+                                    金額 (
+                                    <select class="price-select" onchange="changePriceType(this)">
+                                        <option value="retail">散客價</option>
+                                        <option value="shop">車行價</option>
+                                        <option value="vendor">廠商價</option>
+                                    </select>
+                                    )
+                                </th>
+                                <th width="100">備註</th>
+                                <th width="80">儲位</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sales-list">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel-box footer-bar">
+                <div class="form-group">
+                    <label>製表人</label>
+                    <input type="text" class="header-input" value="管理員" style="width:100px;">
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-blue" onclick="editOrder()"><i class="fas fa-edit"></i> 修改</button>
+                    <button class="btn btn-green" onclick="saveSales(true)"><i class="fas fa-print"></i> 存檔+印表</button>
+                    <button class="btn btn-green" onclick="saveSales(false)"><i class="fas fa-save"></i> 存檔</button>
+                    <button class="btn btn-red" onclick="clearOrder()"><i class="fas fa-trash-alt"></i> 刪除</button>
+                    <button class="btn btn-blue" onclick="addSalesRow()"><i class="fas fa-plus"></i> 插入一行</button>
+                    <button class="btn btn-gray" onclick="exitSystem()"><i class="fas fa-sign-out-alt"></i> 退出</button>
+                </div>
+            </div>
+
         </div>
     </div>
-
-    <script src="script.js"></script>
 
     <script>
-        // === 介面控制 ===
-        function openSalesWindow() {
-            const win = document.getElementById('sales-window');
-            win.style.display = 'flex';
-            document.getElementById('customer-code').focus();
-            document.getElementById('order-date').valueAsDate = new Date();
-        }
+        const API_BASE = ""; 
 
-        function closeSalesWindow() {
-            document.getElementById('sales-window').style.display = 'none';
-        }
-
-        // 連動大數字
-        function updateBigTotalDisplay(amount) {
-            // 格式化金額 (加上千分位逗號)
-            document.getElementById('big-total-display').innerText = '$' + amount.toLocaleString();
-        }
-
-        // 複寫 script.js 的計算函式來更新大數字
-        const originalCalculateTotal = window.calculateTotal;
-        window.calculateTotal = function() {
-            let grandTotal = 0;
-            document.querySelectorAll(".p-total").forEach(span => {
-                grandTotal += parseFloat(span.innerText) || 0;
+        document.addEventListener("DOMContentLoaded", () => {
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+            const monthStr = dateStr.slice(0, 7); // 取得 YYYY-MM
+            
+            document.getElementById('sales-date').value = dateStr;
+            document.getElementById('billing-month').value = monthStr;
+            
+            for(let i=0; i<8; i++) addSalesRow();
+            
+            // 點擊空白處關閉下拉選單
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown-wrapper')) {
+                    document.querySelectorAll('.dropdown-wrapper').forEach(d => d.classList.remove('open'));
+                }
             });
-            document.getElementById("big-total-display").innerText = '$' + grandTotal.toLocaleString();
+        });
+
+        // 頂部導航切換
+        function switchSubTab(element, funcId) {
+            document.querySelectorAll('.top-pill').forEach(i => i.classList.remove('active'));
+            if(!element.parentElement.classList.contains('dropdown-wrapper')) {
+                element.classList.add('active');
+            }
+            const titles = {
+                '0': '門市現銷作業',
+                '1': '銷貨登記作業',
+                '2': '銷貨單查詢'
+            };
+            if(titles[funcId]) {
+                document.getElementById('current-mode-title').innerText = titles[funcId];
+                if(funcId === '2') alert("切換至 [銷貨單查詢] 模式");
+            }
         }
+
+        function toggleDropdown(wrapper) {
+            document.querySelectorAll('.dropdown-wrapper').forEach(d => {
+                if(d !== wrapper) d.classList.remove('open');
+            });
+            wrapper.classList.toggle('open');
+        }
+
+        function subAction(actionId) {
+            alert("功能 [" + actionId + "] 開發中...");
+            event.stopPropagation();
+            document.querySelectorAll('.dropdown-wrapper').forEach(d => d.classList.remove('open'));
+        }
+
+        // 新增表格行
+        function addSalesRow() {
+            const tbody = document.getElementById("sales-list");
+            const tr = document.createElement("tr");
+            const index = tbody.children.length + 1;
+
+            tr.innerHTML = `
+                <td style="text-align:center; background:#f8fafc;">${index}</td>
+                <td><input type="text" class="p-code" onchange="fetchProductInfo(this)"></td>
+                <td><input type="text" class="p-car"></td>
+                <td><input type="text" class="p-name"></td>
+                <td><input type="number" class="p-qty" value="" onchange="calcRow(this)"></td>
+                <td><input type="number" class="p-price" value="" onchange="calcRow(this)"></td>
+                <td class="price-col"><input type="text" class="p-total" readonly style="font-weight:bold; color:#059669;"></td>
+                <td><input type="text" class="p-note"></td>
+                <td><input type="text" class="p-loc"></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        // 查詢商品 (API 連接)
+        async function fetchProductInfo(input) {
+            const code = input.value.trim();
+            if (!code) return;
+            const row = input.parentElement.parentElement;
+            
+            try {
+                row.querySelector('.p-name').value = "查詢中...";
+                const res = await fetch(`${API_BASE}/api/products/${code}`);
+                if(res.ok) {
+                    const p = await res.json();
+                    row.querySelector('.p-name').value = p.name;
+                    row.querySelector('.p-car').value = p.carType || '';
+                    row.querySelector('.p-loc').value = p.location || '';
+                    row.querySelector('.p-price').value = p.price; 
+                    
+                    const qty = row.querySelector('.p-qty');
+                    if(!qty.value) qty.value = 1;
+                    
+                    calcRow(input);
+                    qty.focus(); qty.select();
+                } else {
+                     row.querySelector('.p-name').value = "無此商品";
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        function calcRow(ele) {
+            const row = ele.parentElement.parentElement;
+            const qty = parseFloat(row.querySelector('.p-qty').value) || 0;
+            const price = parseFloat(row.querySelector('.p-price').value) || 0;
+            const total = Math.round(qty * price);
+            row.querySelector('.p-total').value = total > 0 ? total : '';
+        }
+
+        function changePriceType(select) {
+            alert("已切換為 [" + select.options[select.selectedIndex].text + "] 模式");
+        }
+
+        // 存檔 (整合新欄位)
+        async function saveSales(printMode) {
+            const items = [];
+            document.querySelectorAll("#sales-list tr").forEach(row => {
+                const code = row.querySelector(".p-code").value;
+                const name = row.querySelector(".p-name").value;
+                
+                if (code || name) {
+                    items.push({
+                        productCode: code || "MANUAL",
+                        productName: name,
+                        carType: row.querySelector(".p-car").value,
+                        quantity: parseInt(row.querySelector(".p-qty").value) || 0,
+                        price: parseFloat(row.querySelector(".p-price").value) || 0,
+                        amount: parseFloat(row.querySelector(".p-total").value) || 0, // 注意: 這裡是 .value
+                        note: row.querySelector(".p-note").value,
+                        location: row.querySelector(".p-loc").value
+                    });
+                }
+            });
+
+            if (items.length === 0) { alert("無資料可存檔"); return; }
+
+            // 收集單頭資料 (含新欄位)
+            const orderData = {
+                date: document.getElementById("sales-date").value,
+                billingMonth: document.getElementById("billing-month").value,
+                customerCode: document.getElementById("sales-cust").value,
+                customerName: document.getElementById("sales-cust-name").value,
+                customerAddress: document.getElementById("sales-addr").value,
+                creator: "管理員", 
+                items: items
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/api/sales`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(orderData)
+                });
+
+                if(res.ok) {
+                    const ret = await res.json();
+                    alert("✅ 存檔成功！\n單號：" + ret.orderNumber);
+                    if(printMode) window.print();
+                    location.reload();
+                } else {
+                    alert("❌ 存檔失敗，請檢查後端連線");
+                }
+            } catch(e) { 
+                console.error(e);
+                alert("⚠️ 連線錯誤：" + e); 
+            }
+        }
+
+        function clearOrder() {
+            if(confirm("確定要刪除整張單據並清空嗎？")) location.reload();
+        }
+
+        function editOrder() { alert("進入修改模式"); }
+        function exitSystem() { if(confirm("確定要退出系統嗎？")) window.close(); }
     </script>
 </body>
 </html>
