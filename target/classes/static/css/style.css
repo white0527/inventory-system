@@ -229,3 +229,93 @@ tr:hover td { background: #f1f5f9; }
     color: #64748b;
     font-weight: bold;
 }
+
+/* =========================================
+   ★ 手機版響應式設定 (RWD)
+   當螢幕寬度小於 768px (手機/平板直立) 時生效
+   ========================================= */
+@media screen and (max-width: 768px) {
+
+    /* 1. 側邊欄：平時隱藏，變成滑動抽屜 */
+    .sidebar {
+        position: fixed;
+        left: -250px; /* 藏在螢幕左邊外面 */
+        top: 0;
+        height: 100vh;
+        width: 250px;
+        transition: 0.3s ease; /* 滑動特效 */
+        box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+    }
+    
+    /* 當側邊欄被加上 .open 類別時，滑出來 */
+    .sidebar.open {
+        left: 0;
+    }
+
+    /* 2. 漢堡按鈕：手機版才顯示 */
+    .mobile-menu-btn {
+        display: flex !important; /* 強制顯示 */
+        padding: 10px 15px;
+        font-size: 20px;
+        color: var(--primary-color);
+        cursor: pointer;
+    }
+
+    /* 3. 上方導航列：調整間距 */
+    .top-bar {
+        padding-left: 5px; /* 留位置給漢堡按鈕 */
+    }
+
+    /* 4. 輸入框與排版：變成直式堆疊 */
+    .header-row, .form-group-row, .analysis-grid {
+        display: flex;
+        flex-direction: column; /* 變成直向排列 */
+        align-items: stretch; /* 拉寬填滿 */
+        gap: 10px;
+    }
+
+    /* 讓所有輸入框在手機上變寬，比較好點 */
+    .header-input, .search-input, select.header-input {
+        width: 100% !important; 
+        font-size: 16px; /* 字體加大，防止 iOS 自動縮放 */
+        padding: 8px;
+    }
+
+    /* 標籤文字左對齊 */
+    .range-label, label {
+        text-align: left;
+        width: 100%;
+    }
+
+    /* 5. 隱藏不必要的裝飾 (例如分隔線) */
+    .top-bar > div[style*="width: 1px"] {
+        display: none;
+    }
+
+    /* 6. 底部按鈕區：變成兩排或捲動 */
+    .footer-bar {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .btn {
+        flex: 1; /* 按鈕平均分配寬度 */
+        justify-content: center;
+        padding: 10px;
+    }
+
+    /* 7. 銷貨分析的四宮格變成一條龍 */
+    .analysis-grid {
+        grid-template-columns: 1fr; /* 變成單欄 */
+    }
+    
+    /* 8. 調整彈出視窗寬度 */
+    .panel-box[style*="width: 500px"], 
+    .panel-box[style*="width: 700px"] {
+        width: 100% !important; /* 手機上強制滿版 */
+    }
+}
+
+/* 電腦版預設隱藏漢堡按鈕 */
+.mobile-menu-btn {
+    display: none;
+}

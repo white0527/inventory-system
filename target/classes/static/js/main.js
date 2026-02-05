@@ -234,3 +234,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById('sales-date');
     if(dateInput) dateInput.valueAsDate = new Date();
 });
+
+/**
+ * --- 手機版側邊欄控制 ---
+ */
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    // 切換 open 類別
+    sidebar.classList.toggle('open');
+}
+
+// 點擊主畫面任一處，如果側邊欄是開的，就把它關起來 (體驗更好)
+document.querySelector('.main-content').addEventListener('click', function(e) {
+    const sidebar = document.querySelector('.sidebar');
+    // 如果點擊的不是漢堡按鈕，且側邊欄是開的
+    if (!e.target.closest('.mobile-menu-btn') && sidebar.classList.contains('open')) {
+        sidebar.classList.remove('open');
+    }
+});
