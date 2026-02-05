@@ -1,3 +1,11 @@
 com\example\demo\DemoApplication.class
+com\example\demo\repository\SalesOrderRepository.class
+com\example\demo\entity\SalesOrderItem.class
 com\example\demo\controller\SalesController.class
 com\example\demo\controller\ProductController.class
+com\example\demo\repository\PartRepository.class
+com\example\demo\entity\SalesOrder.class
+com\example\demo\dto\SalesRequest.class
+com\example\demo\entity\Part.class
+com\example\demo\dto\SalesRequest$Item.class
+com\example\demo\controller\ApiController.class
