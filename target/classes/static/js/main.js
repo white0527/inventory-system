@@ -1,5 +1,5 @@
 /**
- * main.js - 全域共用邏輯 (包含每日銷貨統計功能)
+ * main.js - 全域共用邏輯 (包含補貨統計功能)
  */
 
 const API_BASE = "";
@@ -16,9 +16,8 @@ function switchMode(mode, element, titleName) {
         element.classList.add('active');
     }
 
-    // 2. 隱藏所有畫面
-    // 加入 'view-daily-stats'
-    const views = ['view-sales-entry', 'view-sales-browse', 'view-import', 'view-construction', 'view-sales-stats', 'view-sales-analysis', 'view-daily-stats'];
+    // 2. 隱藏所有畫面 (加入 view-replenishment)
+    const views = ['view-sales-entry', 'view-sales-browse', 'view-import', 'view-construction', 'view-sales-stats', 'view-sales-analysis', 'view-daily-stats', 'view-replenishment'];
     views.forEach(id => {
         const el = document.getElementById(id);
         if(el) el.style.display = 'none';
@@ -57,19 +56,20 @@ function switchMode(mode, element, titleName) {
         displayTitle = "銷貨分析作業";
     }
     else if (mode === 'daily-stats') {
-        // [模式 7] 每日銷貨統計
         const view = document.getElementById('view-daily-stats');
         if(view) view.style.display = 'flex';
-        
-        // 預設為當前月份
         const today = new Date();
-        const monthStr = today.toISOString().slice(0, 7); // YYYY-MM
-        document.getElementById('daily-stats-month').value = monthStr;
-        
-        // 清空列表
+        document.getElementById('daily-stats-month').value = today.toISOString().slice(0, 7);
         document.getElementById('daily-stats-list').innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999; padding:20px;">請選擇月份並按 [開始計算]</td></tr>';
-        
         displayTitle = "每日銷貨統計";
+    }
+    else if (mode === 'replenishment') {
+        // [模式 8] 補貨統計
+        const view = document.getElementById('view-replenishment');
+        if(view) view.style.display = 'flex';
+        initDateRange('rep-date-start', 'rep-date-end');
+        document.getElementById('replenishment-result-panel').style.display = 'none';
+        displayTitle = "補貨統計作業";
     }
     else if (mode === 'import') {
         const view = document.getElementById('view-import');
@@ -100,58 +100,64 @@ function initDateRange(startId, endId) {
     }
 }
 
-// --- 每日銷貨統計功能 ---
-function runDailyStats() {
-    const monthInput = document.getElementById('daily-stats-month').value;
-    if (!monthInput) { alert("請選擇月份"); return; }
+// --- 補貨統計功能 ---
+function runReplenishment() {
+    const outputType = document.querySelector('input[name="rep-output"]:checked').value;
+    if (outputType !== 'S') { alert("模擬功能僅支援螢幕顯示"); return; }
 
-    const tbody = document.getElementById('daily-stats-list');
-    tbody.innerHTML = ""; // 清空
-    document.getElementById('daily-stats-info').innerText = `統計區間: ${monthInput}`;
+    const resultPanel = document.getElementById('replenishment-result-panel');
+    const tbody = document.getElementById('replenishment-result-list');
+    
+    resultPanel.style.display = 'flex';
+    tbody.innerHTML = "";
+    
+    // 模擬補貨資料
+    for(let i=1; i<=6; i++) {
+        const currentStock = Math.floor(Math.random() * 5); // 庫存很低
+        const safeStock = 10;
+        const suggestQty = safeStock - currentStock + 5; // 建議補到安全量+5
+        const price = Math.floor(Math.random() * 1000) + 100;
 
-    // 取得該月有多少天
-    const [year, month] = monthInput.split('-');
-    const daysInMonth = new Date(year, month, 0).getDate();
-
-    let sumSales = 0, sumCount1 = 0, sumReturn = 0, sumCount2 = 0, sumNet = 0, sumProfit = 0;
-
-    // 迴圈產生每一天的資料 (模擬)
-    for (let day = 1; day <= daysInMonth; day++) {
-        // 隨機產生數據 (有些天數是0)
-        const hasSales = Math.random() > 0.3; 
-        const salesAmt = hasSales ? Math.floor(Math.random() * 50000) + 1000 : 0;
-        const salesCount = hasSales ? Math.floor(Math.random() * 10) + 1 : 0;
-        
-        const hasReturn = Math.random() > 0.8; // 少部分有退貨
-        const returnAmt = hasReturn ? Math.floor(Math.random() * 2000) : 0;
-        const returnCount = hasReturn ? 1 : 0;
-
-        const net = salesAmt - returnAmt;
-        const profit = Math.floor(net * 0.3); // 假設毛利 30%
-
-        // 累加總計
-        sumSales += salesAmt;
-        sumCount1 += salesCount;
-        sumReturn += returnAmt;
-        sumCount2 += returnCount;
-        sumNet += net;
-        sumProfit += profit;
-
-        // 插入列
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td style="text-align:center;">${day}</td>
-            <td style="text-align:right;">${salesAmt === 0 ? '' : salesAmt.toLocaleString()}</td>
-            <td style="text-align:right;">${salesCount === 0 ? '' : salesCount}</td>
-            <td style="text-align:right; color:red;">${returnAmt === 0 ? '' : returnAmt.toLocaleString()}</td>
-            <td style="text-align:right;">${returnCount === 0 ? '' : returnCount}</td>
-            <td style="text-align:right; font-weight:bold; color:blue;">${net.toLocaleString()}</td>
-            <td style="text-align:right; color:green;">${profit.toLocaleString()}</td>
+            <td>P-2026-${100+i}</td>
+            <td>機車煞車皮 (模擬)</td>
+            <td>廠商 ${String.fromCharCode(64+i)}</td>
+            <td style="text-align:right; color:red; font-weight:bold;">${currentStock}</td>
+            <td style="text-align:right;">${safeStock}</td>
+            <td style="text-align:right; color:blue; font-weight:bold;">${suggestQty}</td>
+            <td style="text-align:right;">$${price}</td>
         `;
         tbody.appendChild(tr);
     }
+    
+    resultPanel.scrollIntoView({ behavior: 'smooth' });
+}
 
-    // 更新底部合計
+// (其他舊函式：runStats, runDailyStats, runAnalysis... 保持原樣)
+function runDailyStats() {
+    const monthInput = document.getElementById('daily-stats-month').value;
+    if (!monthInput) { alert("請選擇月份"); return; }
+    const tbody = document.getElementById('daily-stats-list');
+    tbody.innerHTML = ""; 
+    document.getElementById('daily-stats-info').innerText = `統計區間: ${monthInput}`;
+    const [year, month] = monthInput.split('-');
+    const daysInMonth = new Date(year, month, 0).getDate();
+    let sumSales = 0, sumCount1 = 0, sumReturn = 0, sumCount2 = 0, sumNet = 0, sumProfit = 0;
+    for (let day = 1; day <= daysInMonth; day++) {
+        const hasSales = Math.random() > 0.3; 
+        const salesAmt = hasSales ? Math.floor(Math.random() * 50000) + 1000 : 0;
+        const salesCount = hasSales ? Math.floor(Math.random() * 10) + 1 : 0;
+        const hasReturn = Math.random() > 0.8; 
+        const returnAmt = hasReturn ? Math.floor(Math.random() * 2000) : 0;
+        const returnCount = hasReturn ? 1 : 0;
+        const net = salesAmt - returnAmt;
+        const profit = Math.floor(net * 0.3); 
+        sumSales += salesAmt; sumCount1 += salesCount; sumReturn += returnAmt; sumCount2 += returnCount; sumNet += net; sumProfit += profit;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td style="text-align:center;">${day}</td><td style="text-align:right;">${salesAmt===0?'':salesAmt.toLocaleString()}</td><td style="text-align:right;">${salesCount===0?'':salesCount}</td><td style="text-align:right;color:red;">${returnAmt===0?'':returnAmt.toLocaleString()}</td><td style="text-align:right;">${returnCount===0?'':returnCount}</td><td style="text-align:right;font-weight:bold;color:blue;">${net.toLocaleString()}</td><td style="text-align:right;color:green;">${profit.toLocaleString()}</td>`;
+        tbody.appendChild(tr);
+    }
     document.getElementById('d-total-sales').innerText = sumSales.toLocaleString();
     document.getElementById('d-total-count1').innerText = sumCount1;
     document.getElementById('d-total-return').innerText = sumReturn.toLocaleString();
@@ -160,7 +166,6 @@ function runDailyStats() {
     document.getElementById('d-total-profit').innerText = sumProfit.toLocaleString();
 }
 
-// (其他舊函式：runStats, runAnalysis, uploadExcel... 保持原樣)
 function runStats() {
     const outputType = document.querySelector('input[name="stats-output"]:checked').value;
     if (outputType !== 'S') { alert("模擬功能僅支援螢幕顯示"); return; }
@@ -227,28 +232,17 @@ document.addEventListener('click', function(e) {
         document.querySelectorAll('.dropdown-wrapper.active').forEach(item => item.classList.remove('active'));
     }
 });
+// 側邊欄控制
+function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('open'); }
+document.querySelector('.main-content').addEventListener('click', function(e) {
+    const sidebar = document.querySelector('.sidebar');
+    if (!e.target.closest('.mobile-menu-btn') && sidebar.classList.contains('open')) { sidebar.classList.remove('open'); }
+});
+
 function exitSystem() {
     if(confirm("確定要退出系統嗎？")) window.close();
 }
 document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById('sales-date');
     if(dateInput) dateInput.valueAsDate = new Date();
-});
-
-/**
- * --- 手機版側邊欄控制 ---
- */
-function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    // 切換 open 類別
-    sidebar.classList.toggle('open');
-}
-
-// 點擊主畫面任一處，如果側邊欄是開的，就把它關起來 (體驗更好)
-document.querySelector('.main-content').addEventListener('click', function(e) {
-    const sidebar = document.querySelector('.sidebar');
-    // 如果點擊的不是漢堡按鈕，且側邊欄是開的
-    if (!e.target.closest('.mobile-menu-btn') && sidebar.classList.contains('open')) {
-        sidebar.classList.remove('open');
-    }
 });

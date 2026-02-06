@@ -319,3 +319,42 @@ tr:hover td { background: #f1f5f9; }
 .mobile-menu-btn {
     display: none;
 }
+
+/* === 補貨統計專用樣式 === */
+.supplier-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 電腦版一排 4 個 */
+    gap: 10px;
+    padding: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    max-height: 150px;
+    overflow-y: auto; /* 太多時可以捲動 */
+}
+
+/* 手機版自動變一排 2 個 */
+@media screen and (max-width: 768px) {
+    .supplier-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.option-group {
+    border: 1px solid #e2e8f0;
+    padding: 10px;
+    border-radius: 6px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.option-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: #64748b;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}

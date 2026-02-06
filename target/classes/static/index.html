@@ -1,3 +1,4 @@
+<!-- 系統前置 -->
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -8,9 +9,9 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
+<!--側邊系統  -->
     <div class="sidebar">
-        <div class="logo-area">祥易機車材料</div>
+        <div class="logo-area">祥易機車材料零件管理</div>
         <ul class="nav-menu">
             <li class="nav-item active" onclick="switchMode('entry', this, '門市現銷作業')">
                 <i class="fas fa-cash-register"></i> 1. 銷貨
@@ -47,7 +48,7 @@
             </li>
         </ul>
     </div>
-
+<!-- 上方系統 -->
     <div class="main-content">
         
         <div class="top-bar" id="sales-top-menu">
@@ -70,7 +71,8 @@
             
             <div class="top-pill" onclick="switchMode('daily-stats', this, '每日銷貨統計')">7. 每日銷貨統計</div>
             
-            <div class="top-pill" onclick="switchMode('construction', this, '補貨統計')">8. 補貨統計</div>
+            <div class="top-pill" onclick="switchMode('replenishment', this, '補貨統計作業')">8. 補貨統計</div>
+            
             <div class="top-pill" onclick="switchMode('construction', this, '銷售商品統計')">9. 銷售商品統計</div>
             <div class="top-pill" onclick="switchMode('construction', this, '修改附單訊息')">10. 修改附單訊息</div>
 
@@ -79,11 +81,11 @@
             <div class="dropdown-wrapper" onclick="toggleDropdown(this)">
                 <div class="top-pill">A. 銷貨退貨 <i class="fas fa-chevron-down"></i></div>
                 <div class="dropdown-menu">
-                    <div class="dropdown-item" onclick="switchMode('construction', this, '退貨登記')">1. 退貨登記</div>
-                    <div class="dropdown-item" onclick="switchMode('construction', this, '退貨查詢')">2. 退貨查詢</div>
-                    <div class="dropdown-item" onclick="switchMode('construction', this, '瀏覽式退貨查詢')">3. 瀏覽式退貨查詢</div>
-                    <div class="dropdown-item" onclick="switchMode('construction', this, '退貨統計')">4. 退貨統計</div>
-                    <div class="dropdown-item" onclick="switchMode('construction', this, '退貨分析')">5. 退貨分析</div>
+                    <div class="dropdown-item" onclick="switchMode('entry', this, '退貨登記作業')">1. 退貨登記</div>
+                    <div class="dropdown-item" onclick="switchMode('entry', this, '退貨查詢作業')">2. 退貨查詢</div>
+                    <div class="dropdown-item" onclick="switchMode('browse', this, '瀏覽式退貨查詢')">3. 瀏覽式退貨查詢</div>
+                    <div class="dropdown-item" onclick="switchMode('stats', this, '退貨統計作業')">4. 退貨統計</div>
+                    <div class="dropdown-item" onclick="switchMode('analysis', this, '退貨分析作業')">5. 退貨分析</div>
                 </div>
             </div>
             
@@ -108,7 +110,7 @@
                 </div>
             </div>
         </div>
-
+<!-- 門市現銷作業內容 -->
         <div class="workspace">
             <div style="padding-left:5px; font-size:16px; font-weight:bold; color:var(--primary-color);">
                 <i class="fas fa-angle-right"></i> <span id="current-mode-title">門市現銷作業</span>
@@ -193,7 +195,7 @@
                     </div>
                 </div>
             </div>
-
+<!-- 瀏覽式查詢內容 -->
             <div id="view-sales-browse" style="display:none;">
                 <div class="panel-box search-panel">
                     <div class="search-left">
@@ -239,7 +241,7 @@
                     </div>
                 </div>
             </div>
-
+<!-- 銷貨統計內容 -->
             <div id="view-sales-stats" style="display:none; flex-direction:column; align-items:center; padding-top:20px;">
                 <div class="panel-box" style="width: 500px; display:flex; flex-direction:column; gap:20px; border-top: 4px solid var(--primary-color);">
                     
@@ -318,7 +320,7 @@
                     </div>
                 </div>
             </div>
-
+<!-- 銷貨分析條件內容 -->
             <div id="view-sales-analysis" style="display:none; flex-direction:column; align-items:center; padding-top:20px;">
                 <div class="panel-box" style="width: 700px; display:flex; flex-direction:column; gap:20px; border-top: 4px solid var(--primary-color);">
                     
@@ -394,7 +396,7 @@
                     </div>
                 </div>
             </div>
-
+<!-- 每日銷貨統計內容 -->
             <div id="view-daily-stats" style="display:none; flex-direction:column; height:100%; gap:15px;">
                 
                 <div class="panel-box search-panel" style="flex-shrink:0; align-items:center; gap:20px;">
@@ -466,7 +468,120 @@
                     </div>
                 </div>
             </div>
+<!-- 每日補貨統計內容 -->
+            <div id="view-replenishment" style="display:none; flex-direction:column; align-items:center; padding-top:20px;">
+                
+                <div class="panel-box" style="width: 800px; display:flex; flex-direction:column; gap:15px; border-top: 4px solid var(--primary-color);">
+                    
+                    <div style="font-size:18px; font-weight:bold; color:var(--primary-color); border-bottom:1px solid #eee; padding-bottom:10px;">
+                        <i class="fas fa-boxes"></i> 補貨統計條件設定
+                    </div>
 
+                    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                        <div style="flex:1;">
+                            <label class="tiny-label">日期範圍:</label>
+                            <div style="display:flex; gap:5px; align-items:center;">
+                                <input type="date" id="rep-date-start" class="header-input" style="width:100%">
+                                <span>~</span>
+                                <input type="date" id="rep-date-end" class="header-input" style="width:100%">
+                            </div>
+                        </div>
+                        <div style="flex:1;">
+                            <label class="tiny-label">商品代號範圍:</label>
+                            <div style="display:flex; gap:5px; align-items:center;">
+                                <input type="text" class="header-input" placeholder="起" style="width:100%">
+                                <span>~</span>
+                                <input type="text" class="header-input" placeholder="迄" style="width:100%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <label class="tiny-label">供貨廠商代號 (留白表示全部):</label>
+                            <span style="font-size:12px; color:red;">* 若全部空白表示全部都要</span>
+                        </div>
+                        <div class="supplier-grid">
+                            <input type="text" class="header-input" placeholder="廠商1">
+                            <input type="text" class="header-input" placeholder="廠商2">
+                            <input type="text" class="header-input" placeholder="廠商3">
+                            <input type="text" class="header-input" placeholder="廠商4">
+                            <input type="text" class="header-input" placeholder="廠商5">
+                            <input type="text" class="header-input" placeholder="廠商6">
+                            <input type="text" class="header-input" placeholder="廠商7">
+                            <input type="text" class="header-input" placeholder="廠商8">
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px;">
+                        
+                        <div class="option-group">
+                            <div class="option-title">列印售價</div>
+                            <div style="display:flex; gap:15px;">
+                                <label class="radio-label"><input type="radio" name="rep-price" value="Y" checked> R.列印</label>
+                                <label class="radio-label"><input type="radio" name="rep-price" value="N"> N.不印</label>
+                            </div>
+                        </div>
+
+                        <div class="option-group">
+                            <div class="option-title">檢查庫存條件</div>
+                            <div style="display:flex; flex-direction:column; gap:5px;">
+                                <label class="radio-label"><input type="radio" name="rep-cond" value="0"> 庫存: 0</label>
+                                <div style="display:flex; align-items:center; gap:5px;">
+                                    <label class="radio-label"><input type="radio" name="rep-cond" value="L" checked> 庫存 < </label>
+                                    <input type="number" class="small-input" value="10" style="width:60px;">
+                                </div>
+                                <label class="radio-label"><input type="radio" name="rep-cond" value="S"> F.安全庫存量</label>
+                            </div>
+                        </div>
+
+                        <div class="option-group">
+                            <div class="option-title">輸出選項</div>
+                            <div style="display:flex; flex-direction:column; gap:5px;">
+                                <label class="radio-label"><input type="radio" name="rep-output" value="S" checked> S.螢幕 (可轉採購單)</label>
+                                <label class="radio-label"><input type="radio" name="rep-output" value="P"> P.印表機</label>
+                                <label class="radio-label"><input type="radio" name="rep-output" value="D"> D.文件</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; background:#f1f5f9; padding:10px; border-radius:6px;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <label>印表機:</label>
+                            <select class="header-input" style="width:200px;"><option>Microsoft Print to PDF</option></select>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn btn-blue" onclick="runReplenishment()"><i class="fas fa-play"></i> G.開始</button>
+                            <button class="btn btn-gray" onclick="switchMode('entry', document.querySelector('.top-pill.active'), '門市現銷作業')"><i class="fas fa-sign-out-alt"></i> Q.退出</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="replenishment-result-panel" class="panel-box" style="width: 100%; margin-top:20px; display:none; flex-direction:column;">
+                    <div class="grid-header-label">
+                        <i class="fas fa-clipboard-list"></i> 補貨建議清單
+                        <button class="btn btn-green" style="margin-left:auto; padding:2px 10px; font-size:12px;" onclick="alert('已轉成採購單!')">轉採購單</button>
+                    </div>
+                    <div class="grid-container" style="height: 300px; overflow:auto;">
+                        <table class="browse-table">
+                            <thead>
+                                <tr>
+                                    <th>商品代號</th>
+                                    <th>商品名稱</th>
+                                    <th>主要廠商</th>
+                                    <th>目前庫存</th>
+                                    <th>安全庫存</th>
+                                    <th>建議進貨量</th>
+                                    <th>售價</th>
+                                </tr>
+                            </thead>
+                            <tbody id="replenishment-result-list">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+<!-- EXCEL商品匯入 -->
             <div id="view-import" style="display:none; flex-direction:column; gap:20px; padding:20px;">
                 <div class="panel-box">
                     <div style="font-size:18px; font-weight:bold; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
