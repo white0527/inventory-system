@@ -3,442 +3,344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>祥易行動查價</title>
+    
+    <title>祥易行動系統</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="祥易查價">
+    
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1041/1041888.png">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1041/1041888.png">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
-            /* iOS 16 System Colors */
-            --ios-bg: #F2F2F7;          /* 系統背景灰 */
-            --ios-card: #FFFFFF;        /* 卡片白 */
-            --ios-blue: #007AFF;        /* 系統藍 */
-            --ios-green: #34C759;       /* 系統綠 */
-            --ios-red: #FF3B30;         /* 系統紅 */
-            --ios-gray: #8E8E93;        /* 系統灰 */
-            --ios-gray-light: #E5E5EA;  /* 搜尋框底色 */
-            --ios-separator: #C6C6C8;   /* 分隔線 */
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-blue: #007AFF;
+            --ios-green: #34C759;
+            --ios-red: #FF3B30;
+            --ios-gray: #8E8E93;
+            --ios-gray-light: #E5E5EA;
+            --ios-separator: #C6C6C8;
             --text-primary: #000000;
-            --text-secondary: #3C3C4399; /* 60% opacity */
-            
+            --text-secondary: #3C3C4399;
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        body { 
-            margin: 0; padding: 0; 
-            background-color: var(--ios-bg); 
-            color: var(--text-primary); 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow: hidden; 
+        body { margin: 0; padding: 0; background-color: var(--ios-bg); color: var(--text-primary); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* === 登入畫面 === */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--ios-bg); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 30px; transition: transform 0.4s ease-in-out;
+        }
+        .login-logo { font-size: 60px; color: var(--ios-blue); margin-bottom: 20px; }
+        .login-title { font-size: 24px; font-weight: 800; margin-bottom: 40px; color: var(--text-primary); }
+        .login-input {
+            width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px;
+            border: 1px solid var(--ios-separator); background: var(--ios-card); font-size: 16px; outline: none;
+        }
+        .login-btn {
+            width: 100%; padding: 15px; border-radius: 12px; background: var(--ios-blue);
+            color: white; font-weight: bold; font-size: 18px; border: none; cursor: pointer; margin-top: 10px;
         }
 
-        /* === iOS 毛玻璃導航欄 === */
+        /* === 導航欄 (毛玻璃) === */
         .nav-bar {
-            background: rgba(255, 255, 255, 0.85); /* 半透明白 */
-            backdrop-filter: blur(20px); /* 毛玻璃特效 */
-            -webkit-backdrop-filter: blur(20px);
-            height: calc(44px + var(--safe-top));
-            padding-top: var(--safe-top);
-            border-bottom: 0.5px solid rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            height: calc(44px + var(--safe-top)); padding-top: var(--safe-top);
+            border-bottom: 0.5px solid rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center;
+            position: sticky; top: 0; z-index: 100;
         }
+        .nav-title { font-size: 17px; font-weight: 600; }
         
-        .nav-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
+        .content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; padding-bottom: calc(80px + var(--safe-bottom)); }
+        .hidden-for-employee { display: none !important; }
 
-        /* === 主要滾動區 === */
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding-bottom: calc(20px + var(--safe-bottom));
+        /* === 搜尋區 === */
+        .search-container { display: flex; gap: 10px; align-items: center; }
+        .search-wrapper { 
+            flex: 1; background-color: var(--ios-gray-light); border-radius: 10px; height: 44px;
+            display: flex; align-items: center; padding: 0 12px; transition: 0.2s;
         }
-
-        /* === iOS 搜尋框 === */
-        .search-container {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .search-wrapper {
-            flex: 1;
-            background-color: var(--ios-gray-light);
-            border-radius: 10px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            padding: 0 8px;
-            transition: 0.2s;
-        }
+        .search-wrapper:focus-within { background-color: #d1d1d6; }
+        .search-icon { color: var(--text-secondary); font-size: 16px; margin-right: 8px; }
+        .search-input { border: none; background: transparent; font-size: 17px; width: 100%; outline: none; height: 100%; }
         
-        .search-wrapper:focus-within {
-            background-color: #d1d1d6; /* 聚焦時稍微變深 */
+        /* 查詢按鈕 */
+        .search-btn {
+            background-color: var(--ios-blue); color: white; border: none; border-radius: 10px;
+            height: 44px; padding: 0 20px; font-size: 16px; font-weight: 600; cursor: pointer;
+            flex-shrink: 0;
         }
+        .search-btn:active { opacity: 0.8; }
 
-        .search-icon {
-            color: var(--text-secondary);
-            font-size: 14px;
-            margin-right: 6px;
-        }
+        /* === iOS 卡片風格 === */
+        .ios-card { background: var(--ios-card); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.02); display: none; margin-bottom: 5px; animation: popIn 0.3s; }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        .search-input {
-            border: none;
-            background: transparent;
-            font-size: 17px;
-            width: 100%;
-            outline: none;
-            color: var(--text-primary);
-        }
-        
-        .search-input::placeholder { color: var(--text-secondary); }
-
-        .scan-btn {
-            color: var(--ios-blue);
-            background: none;
-            border: none;
-            font-size: 22px;
-            padding: 5px;
-            cursor: pointer;
-        }
-
-        /* === iOS 卡片風格 (Inset Grouped) === */
-        .ios-card {
-            background: var(--ios-card);
-            border-radius: 12px;
-            overflow: hidden; /* 讓子元素的圓角不溢出 */
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02); /* 極淡的陰影 */
-            margin-bottom: 5px;
-            display: none; /* 預設隱藏 */
-            animation: popIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        /* 商品標頭 */
-        .product-header {
-            padding: 16px;
-            border-bottom: 0.5px solid var(--ios-separator);
-        }
+        .product-header { padding: 16px; border-bottom: 0.5px solid var(--ios-separator); }
         .p-name { font-size: 20px; font-weight: 700; margin-bottom: 6px; line-height: 1.3; }
-        .p-tags { display: flex; gap: 8px; }
-        .ios-tag { 
-            font-size: 12px; font-weight: 500; padding: 4px 8px; border-radius: 6px; 
-            background: var(--ios-bg); color: var(--text-secondary);
-        }
+        .p-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+        .ios-tag { font-size: 13px; font-weight: 500; padding: 4px 10px; border-radius: 6px; background: var(--ios-bg); color: var(--text-secondary); }
         .tag-blue { color: var(--ios-blue); background: rgba(0, 122, 255, 0.1); }
 
-        /* 資訊網格 */
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            /* iOS 分隔線技巧 */
-            background: var(--ios-separator);
-            gap: 0.5px; 
-            border-bottom: 0.5px solid var(--ios-separator);
-        }
-        .info-cell {
-            background: var(--ios-card);
-            padding: 12px;
-            text-align: center;
-        }
-        .cell-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
-        .cell-val { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; background: var(--ios-separator); gap: 0.5px; border-bottom: 0.5px solid var(--ios-separator); }
+        .info-cell { background: var(--ios-card); padding: 16px; text-align: center; }
+        .cell-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+        .cell-val { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
         .text-red { color: var(--ios-red); }
 
-        /* 價格選單 (類似 iOS 設定選項) */
-        .price-list {
-            display: flex;
-            flex-direction: column;
-        }
-        .price-item {
-            padding: 14px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--ios-card);
-            cursor: pointer;
-            transition: background 0.2s;
-            position: relative;
-        }
-        
-        /* 點擊回饋 */
-        .price-item:active { background: #E5E5EA; }
-
-        /* 內部分隔線 (不滿版) */
-        .price-item:not(:last-child)::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            left: 16px; /* 左側留白 */
-            height: 0.5px;
-            background-color: var(--ios-separator);
-        }
-
-        .price-label { font-size: 16px; font-weight: 400; color: var(--text-primary); }
-        .price-val { font-size: 18px; font-weight: 600; }
+        .price-list { display: flex; flex-direction: column; }
+        .price-item { padding: 16px; display: flex; justify-content: space-between; align-items: center; background: var(--ios-card); position: relative; }
+        .price-item:not(:last-child)::after { content: ""; position: absolute; bottom: 0; right: 0; left: 16px; height: 0.5px; background-color: var(--ios-separator); }
+        .price-label { font-size: 16px; color: var(--text-primary); }
+        .price-val { font-size: 20px; font-weight: 700; }
         .val-green { color: var(--ios-green); }
         .val-blue { color: var(--ios-blue); }
-        .check-icon { 
-            color: var(--ios-blue); 
-            font-size: 18px; 
-            opacity: 0; 
-            transform: translateX(-10px);
-            transition: 0.2s;
-            margin-right: 10px;
-        }
+        .val-orange { color: #d97706; }
+
+        .ios-btn { background-color: var(--ios-blue); color: white; border: none; border-radius: 12px; padding: 14px; font-size: 17px; font-weight: 600; width: 100%; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
         
-        /* 選中狀態 */
-        .price-item.selected .check-icon { opacity: 1; transform: translateX(0); }
-        .price-item.selected { background-color: #F2F8FF; }
+        /* 底部導航 (固定) */
+        .bottom-nav { height: calc(60px + var(--safe-bottom)); background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-top: 0.5px solid var(--ios-separator); display: flex; justify-content: space-around; align-items: flex-start; padding-top: 10px; position: fixed; bottom: 0; width: 100%; z-index: 90; }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--ios-gray); gap: 4px; background: none; border: none; width: 100%; }
+        .nav-btn i { font-size: 24px; margin-bottom: 2px; }
+        .nav-btn.active { color: var(--ios-blue); }
 
-        /* iOS 按鈕 */
-        .ios-btn {
-            background-color: var(--ios-blue);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 14px;
-            font-size: 17px;
-            font-weight: 600;
-            width: 100%;
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 122, 255, 0.2);
-        }
-        .ios-btn:active { opacity: 0.7; transform: scale(0.98); }
+        .empty-state { text-align: center; color: var(--ios-gray); margin-top: 80px; }
+        .empty-icon { font-size: 50px; margin-bottom: 20px; opacity: 0.3; }
 
-        /* 歷史紀錄標題 */
-        .section-header {
-            font-size: 13px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            margin-left: 16px;
-            margin-bottom: 6px;
-            margin-top: 10px;
-        }
-
-        /* 歷史紀錄列表 (Inset Grouped) */
-        .history-list {
-            background: var(--ios-card);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        .h-item {
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-        }
-        .h-item:not(:last-child)::after {
-            content: ""; position: absolute; bottom: 0; right: 0; left: 16px;
-            height: 0.5px; background-color: var(--ios-separator);
-        }
-        .h-left { display: flex; flex-direction: column; gap: 2px; }
-        .h-title { font-size: 16px; font-weight: 500; }
-        .h-sub { font-size: 12px; color: var(--text-secondary); }
-        .h-right { text-align: right; }
-        .h-price { font-size: 16px; font-weight: 600; color: var(--text-primary); }
-        .h-tag { font-size: 11px; color: var(--ios-gray); }
-
-        /* 空狀態 */
-        .empty-state {
-            text-align: center;
-            color: var(--ios-gray);
-            margin-top: 60px;
-        }
-        .empty-icon { font-size: 48px; margin-bottom: 15px; opacity: 0.3; }
-
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .menu-item { background: white; padding: 20px; border-radius: 12px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .menu-item i { font-size: 28px; color: var(--ios-blue); }
+        .profile-card { background: white; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .avatar { width: 60px; height: 60px; background: var(--ios-gray-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: var(--ios-gray); }
+        .role-tag { background: var(--ios-blue); color: white; padding: 4px 10px; border-radius: 6px; font-size: 13px; margin-top: 5px; display: inline-block; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="nav-bar">
-        <div class="nav-title">祥易行動查價</div>
+    <div id="login-screen">
+        <div class="login-logo"><i class="fas fa-cubes"></i></div>
+        <div class="login-title">祥易行動系統</div>
+        <input type="text" id="login-user" class="login-input" placeholder="帳號">
+        <input type="password" id="login-pass" class="login-input" placeholder="密碼">
+        <button class="login-btn" onclick="performLogin()">登入</button>
+        <div style="margin-top:20px; font-size:13px; color:gray;">
+            預設: admin/8888 或 user/1234
+        </div>
     </div>
 
-    <div class="content">
+    <div id="main-app" style="display:none; height: 100vh; flex-direction: column;">
         
-        <div class="search-container">
-            <div class="search-wrapper">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="keyword" class="search-input" placeholder="搜尋代號或名稱" inputmode="text" onkeypress="if(event.key==='Enter') doSearch()">
+        <div class="nav-bar">
+            <div class="nav-title" id="header-title">商品查價</div>
+        </div>
+
+        <div id="view-search" class="content" style="display:flex;">
+            <div class="search-container">
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="keyword" class="search-input" placeholder="輸入商品代號或名稱" style="text-transform: uppercase;" onkeypress="if(event.key==='Enter') doSearch()">
+                </div>
+                <button class="search-btn" onclick="doSearch()">查詢</button>
             </div>
-            <button class="scan-btn" onclick="mockScan()">
-                <i class="fas fa-barcode"></i>
+
+            <div id="empty-hint" class="empty-state">
+                <i class="fas fa-keyboard empty-icon"></i>
+                <p>請輸入關鍵字查詢庫存與價格</p>
+            </div>
+
+            <div id="result-card" class="ios-card">
+                <div class="product-header">
+                    <div class="p-name" id="d-name">--</div>
+                    <div class="p-tags">
+                        <span class="ios-tag tag-blue" id="d-car">--</span>
+                        <span class="ios-tag" id="d-code">--</span>
+                    </div>
+                </div>
+                <div class="info-grid">
+                    <div class="info-cell"><div class="cell-label">目前庫存</div><div class="cell-val text-red" id="d-stock">--</div></div>
+                    <div class="info-cell"><div class="cell-label">儲位編號</div><div class="cell-val" id="d-loc">--</div></div>
+                </div>
+                <div class="price-list">
+                    <div class="price-item"><span class="price-label">散客價</span><span class="price-val val-green" id="d-price1">--</span></div>
+                    <div class="price-item"><span class="price-label">同業價</span><span class="price-val val-blue" id="d-price2">--</span></div>
+                    <div class="price-item hidden-for-employee" id="row-cost" onclick="toggleCost()">
+                        <span class="price-label"><i class="fas fa-eye-slash"></i> 成本 (點擊顯示)</span>
+                        <span class="price-val val-orange" id="d-price3" style="filter: blur(6px);">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="ios-btn hidden-for-employee" id="btn-add-stock" onclick="alert('進入進貨編輯模式')">
+                <i class="fas fa-edit"></i> 修改庫存/進貨
             </button>
         </div>
 
-        <div id="empty-hint" class="empty-state">
-            <i class="fas fa-search empty-icon"></i>
-            <p>輸入關鍵字或掃描條碼</p>
-        </div>
-
-        <div id="result-card" class="ios-card">
-            <div class="product-header">
-                <div class="p-name" id="d-name">--</div>
-                <div class="p-tags">
-                    <span class="ios-tag tag-blue" id="d-car">--</span>
-                    <span class="ios-tag" id="d-code">--</span>
-                </div>
+        <div id="view-menu" class="content" style="display:none;">
+            <div class="menu-grid">
+                <div class="menu-item hidden-for-employee" onclick="alert('POS 開發中')"><i class="fas fa-cash-register"></i><span>銷貨登記</span></div>
+                <div class="menu-item hidden-for-employee" onclick="alert('進貨開發中')"><i class="fas fa-truck-loading"></i><span>進貨管理</span></div>
+                <div class="menu-item hidden-for-employee" onclick="alert('盤點開發中')"><i class="fas fa-boxes"></i><span>庫存盤點</span></div>
+                <div class="menu-item" onclick="alert('查看庫存清單')"><i class="fas fa-list"></i><span>庫存查詢</span></div>
+                <div class="menu-item hidden-for-employee" onclick="alert('報表統計')"><i class="fas fa-chart-pie"></i><span>報表統計</span></div>
+                <div class="menu-item hidden-for-employee" onclick="alert('系統設定')"><i class="fas fa-cog"></i><span>系統設定</span></div>
             </div>
-
-            <div class="info-grid">
-                <div class="info-cell">
-                    <div class="cell-label">目前庫存</div>
-                    <div class="cell-val text-red" id="d-stock">--</div>
-                </div>
-                <div class="info-cell">
-                    <div class="cell-label">儲位編號</div>
-                    <div class="cell-val" id="d-loc">--</div>
-                </div>
-            </div>
-
-            <div class="price-list">
-                <div class="price-item selected" id="row-retail" onclick="selectPrice('retail')">
-                    <div style="display:flex; align-items:center;">
-                        <i class="fas fa-check check-icon" id="icon-retail"></i>
-                        <span class="price-label">散客價</span>
-                    </div>
-                    <span class="price-val val-green" id="d-price1">$0</span>
-                </div>
-                
-                <div class="price-item" id="row-peer" onclick="selectPrice('peer')">
-                    <div style="display:flex; align-items:center;">
-                        <i class="fas fa-check check-icon" id="icon-peer"></i>
-                        <span class="price-label">車行價</span>
-                    </div>
-                    <span class="price-val val-blue" id="d-price2">$0</span>
-                </div>
+            <div id="employee-msg" class="hidden-for-employee" style="text-align:center; color:gray; margin-top:50px; display:none;">
+                <i class="fas fa-lock" style="font-size:40px; margin-bottom:10px;"></i><br>進階功能僅限管理員使用
             </div>
         </div>
 
-        <div id="action-area" style="display:none;">
-            <button class="ios-btn" onclick="addToList()">
-                <i class="fas fa-arrow-down"></i> 加入紀錄列表
-            </button>
+        <div id="view-profile" class="content" style="display:none;">
+            <div class="profile-card">
+                <div class="avatar"><i class="fas fa-user"></i></div>
+                <div><div style="font-size:20px; font-weight:bold;" id="user-name">訪客</div><div class="role-tag" id="user-role">未登入</div></div>
+            </div>
+            <button class="ios-btn" style="background:var(--ios-red);" onclick="logout()">登出系統</button>
         </div>
 
-        <div id="history-section" style="display:none;">
-            <div class="section-header">最近查詢</div>
-            <div class="history-list" id="history-list">
-                </div>
+        <div class="bottom-nav">
+            <button class="nav-btn active" onclick="switchTab('view-search', '商品查價', this)"><i class="fas fa-search"></i>查價</button>
+            <button class="nav-btn" onclick="switchTab('view-menu', '功能選單', this)"><i class="fas fa-th-large"></i>功能</button>
+            <button class="nav-btn" onclick="switchTab('view-profile', '我的帳號', this)"><i class="fas fa-user"></i>我的</button>
         </div>
-
     </div>
 
     <script>
-        let currentItem = null;
-        let selectedPriceType = 'retail'; // 預設散客
+        // ========================================================
+        // ★★★ 【重要】請填入您的 Render 網址 (不要有 /api) ★★★
+        // 例如: https://xiangyi-system.onrender.com
+        // 如果是本機測試請用: http://localhost:8080
+        // ========================================================
+        const API_BASE_URL = "https://xiangyi-system.onrender.com"; 
 
-        function mockScan() {
-            const input = document.getElementById('keyword');
-            input.value = "P-2026-" + Math.floor(Math.random() * 900 + 100);
-            doSearch();
+        let currentUser = null;
+
+        // === 1. 登入系統 (連線後端) ===
+        async function performLogin() {
+            const u = document.getElementById('login-user').value;
+            const p = document.getElementById('login-pass').value;
+
+            try {
+                // 使用絕對路徑，確保 APK 也能連到後端
+                const response = await fetch(`${API_BASE_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, password: p })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    loginSuccess({ name: data.name, role: data.role });
+                } else {
+                    alert('帳號或密碼錯誤！');
+                }
+            } catch (error) {
+                console.error(error);
+                // 為了讓您目前能先測試介面，若連線失敗會使用模擬登入
+                if (u === 'admin' && p === '8888') loginSuccess({ name: '老闆', role: 'admin' });
+                else if (u === 'user' && p === '1234') loginSuccess({ name: '員工', role: 'employee' });
+                else alert('連線失敗且帳密錯誤');
+            }
         }
 
-        function doSearch() {
+        function loginSuccess(user) {
+            currentUser = user;
+            document.getElementById('user-name').innerText = user.name;
+            document.getElementById('user-role').innerText = user.role === 'admin' ? '管理員 (Boss)' : '一般員工';
+            document.getElementById('user-role').style.background = user.role === 'admin' ? '#007AFF' : '#8E8E93';
+
+            const adminElements = document.querySelectorAll('.hidden-for-employee');
+            const empMsg = document.getElementById('employee-msg');
+
+            if (user.role === 'employee') {
+                adminElements.forEach(el => el.style.display = 'none');
+                if(empMsg) { empMsg.style.display = 'block'; empMsg.classList.remove('hidden-for-employee'); }
+            } else {
+                adminElements.forEach(el => {
+                    if(el.classList.contains('menu-item') || el.classList.contains('price-item')) el.style.display = 'flex';
+                    else if (el.tagName === 'BUTTON') el.style.display = 'flex';
+                    else el.style.display = 'block';
+                });
+                if(empMsg) empMsg.style.display = 'none';
+            }
+            document.getElementById('login-screen').style.transform = 'translateY(-100%)';
+            document.getElementById('main-app').style.display = 'flex';
+        }
+
+        function logout() { if(confirm('確定要登出嗎？')) window.location.reload(); }
+
+        // === 2. 查價功能 (連線後端) ===
+        async function doSearch() {
             const val = document.getElementById('keyword').value.trim();
             if(!val) return;
 
-            // 切換介面顯示
-            document.getElementById('empty-hint').style.display = 'none';
-            document.getElementById('action-area').style.display = 'block';
-            
-            // 重新觸發卡片動畫
-            const card = document.getElementById('result-card');
-            card.style.display = 'none';
-            
-            // 模擬資料
-            const basePrice = Math.floor(Math.random() * 500) + 100;
-            currentItem = {
-                name: "三代勁戰陶瓷煞車皮 (模擬)",
-                car: "勁戰/GTR",
-                code: val.toUpperCase(),
-                stock: Math.floor(Math.random() * 50),
-                loc: "A-0" + Math.floor(Math.random()*9) + "-12",
-                price1: Math.round(basePrice * 2),   // 散客
-                price2: Math.round(basePrice * 1.5)  // 車行
-            };
-
-            // 填入資料
-            document.getElementById('d-name').innerText = currentItem.name;
-            document.getElementById('d-car').innerText = currentItem.car;
-            document.getElementById('d-code').innerText = currentItem.code;
-            document.getElementById('d-stock').innerText = currentItem.stock;
-            document.getElementById('d-loc').innerText = currentItem.loc;
-            document.getElementById('d-price1').innerText = "$" + currentItem.price1.toLocaleString();
-            document.getElementById('d-price2').innerText = "$" + currentItem.price2.toLocaleString();
-
-            // 重置價格選擇
-            selectPrice('retail');
-
-            // 顯示卡片
-            setTimeout(() => card.style.display = 'block', 50);
-
-            // 收鍵盤
-            document.getElementById('keyword').value = "";
             document.getElementById('keyword').blur();
+
+            try {
+                let data = null;
+                // 使用絕對路徑
+                const response = await fetch(`${API_BASE_URL}/api/products/search?keyword=${encodeURIComponent(val)}`);
+                if (response.ok) {
+                    data = await response.json();
+                }
+
+                if (!data) {
+                    // 如果後端沒資料，使用模擬資料 (Fallback)
+                    console.log("使用模擬資料");
+                    const base = Math.floor(Math.random()*500)+100;
+                    data = {
+                        name: "測試商品 " + val, code: val.toUpperCase(), carModel: "通用型",
+                        stock: Math.floor(Math.random()*50), location: "A-01",
+                        priceRetail: Math.round(base * 2), pricePeer: Math.round(base * 1.5), priceCost: base
+                    };
+                }
+
+                // 填入資料
+                document.getElementById('empty-hint').style.display = 'none';
+                document.getElementById('result-card').style.display = 'block';
+                
+                document.getElementById('d-name').innerText = data.name;
+                document.getElementById('d-code').innerText = data.code;
+                document.getElementById('d-car').innerText = data.carModel || data.car; 
+                document.getElementById('d-stock').innerText = data.stock;
+                document.getElementById('d-loc').innerText = data.location || data.loc;
+                document.getElementById('d-price1').innerText = "$" + data.priceRetail;
+                document.getElementById('d-price2').innerText = "$" + data.pricePeer;
+                document.getElementById('d-price3').innerText = "$" + data.priceCost;
+
+                const card = document.getElementById('result-card');
+                card.classList.remove('ios-card');
+                void card.offsetWidth;
+                card.classList.add('ios-card');
+
+            } catch (e) {
+                console.error(e);
+                alert("查詢發生錯誤，請檢查網路");
+            }
         }
 
-        function selectPrice(type) {
-            selectedPriceType = type;
-            
-            // 更新 UI 樣式
-            document.getElementById('row-retail').classList.toggle('selected', type === 'retail');
-            document.getElementById('row-peer').classList.toggle('selected', type === 'peer');
+        function toggleCost() {
+            const el = document.getElementById('d-price3');
+            el.style.filter = el.style.filter === 'none' ? 'blur(6px)' : 'none';
         }
 
-        function addToList() {
-            if(!currentItem) return;
-
-            document.getElementById('history-section').style.display = 'block';
-            const list = document.getElementById('history-list');
-            
-            // 決定顯示價格
-            const finalPrice = selectedPriceType === 'retail' ? currentItem.price1 : currentItem.price2;
-            const typeLabel = selectedPriceType === 'retail' ? '散客' : '車行';
-            const priceColor = selectedPriceType === 'retail' ? 'val-green' : 'val-blue';
-
-            const div = document.createElement('div');
-            div.className = 'h-item';
-            div.innerHTML = `
-                <div class="h-left">
-                    <div class="h-title">${currentItem.name}</div>
-                    <div class="h-sub">${currentItem.code}</div>
-                </div>
-                <div class="h-right">
-                    <div class="h-price ${priceColor}">$${finalPrice.toLocaleString()}</div>
-                    <div class="h-tag">${typeLabel}</div>
-                </div>
-            `;
-            
-            // 插入最上方
-            list.insertBefore(div, list.firstChild);
+        function switchTab(viewId, title, btn) {
+            document.querySelectorAll('.content').forEach(el => el.style.display = 'none');
+            document.getElementById(viewId).style.display = 'flex';
+            document.getElementById('header-title').innerText = title;
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
         }
     </script>
 </body>
