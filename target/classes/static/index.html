@@ -41,8 +41,6 @@
         .price-box:last-child { border-right: none; }
         .price-label { font-size: 11px; color: #888; margin-bottom: 4px; }
         .price-val { font-size: 18px; font-weight: bold; }
-        .cost-val { color: #f59e0b; filter: blur(4px); cursor: pointer; transition: 0.3s; }
-        .cost-val.revealed { filter: none; }
 
         /* 功能選單 */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -127,7 +125,7 @@
         let localProducts = []; 
         let userRole = 'staff'; 
 
-        // 1. 登入連線驗證 (呼叫後端資料庫)
+        // 1. 登入連線驗證
         async function performLogin() {
             const btn = document.querySelector('.login-btn');
             const u = document.getElementById('login-user').value.trim();
@@ -175,7 +173,7 @@
                 adminNavBtn.style.display = 'none'; 
             } else {
                 adminNavBtn.style.display = 'flex'; 
-                loadEmployees(); // 如果是老闆，自動載入員工清單
+                loadEmployees(); 
             }
         }
 
@@ -240,7 +238,6 @@
             } catch(e) { alert("刪除失敗"); }
         }
 
-
         // --- 原本的資料與搜尋功能 ---
         async function syncData() {
             const status = document.getElementById('sync-status');
@@ -299,16 +296,8 @@
 
             results.forEach(p => {
                 const stockColor = p.stock < 3 ? 'red' : 'black'; 
-                let costHtml = '';
-                if (userRole === 'boss') {
-                    costHtml = `
-                        <div class="price-box" onclick="this.querySelector('.cost-val').classList.toggle('revealed')">
-                            <div class="price-label">老闆成本 (點擊)</div>
-                            <div class="cost-val">$${p.priceCost || 0}</div>
-                        </div>
-                    `;
-                }
 
+                // 移除成本區塊，僅顯示庫存、同業價、零售價
                 const html = `
                     <div class="ios-card">
                         <div class="p-title">${p.name}</div>
@@ -330,7 +319,6 @@
                                 <div class="price-label">門市零售價</div>
                                 <div class="price-val" style="color: #28a745;">$${p.priceRetail || 0}</div>
                             </div>
-                            ${costHtml}
                         </div>
                     </div>
                 `;
