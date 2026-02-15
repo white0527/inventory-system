@@ -1,36 +1,37 @@
 package com.example.demo.repository;
 
-import java.time.OffsetDateTime;
-import java.util.List;
-
+import com.example.demo.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.example.demo.entity.Product;
+import java.time.LocalDateTime;
+import java.util.List;
 
-/**
- * 商品資料存取介面
- * 擴展 JpaRepository 以支援離線同步所需的增量查詢
- */
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     /**
-     * 增量同步核心功能：根據時間戳記撈出「最後更新時間」晚於指定時間的商品
-     * 這裡的 UpdatedAt 必須完全對應 Product.java 裡的變數名 updatedAt
-     * @param lastSyncTime 上次手機同步的時間
-     * @return 變動過的商品清單
+     * 1. 增量同步核心方法
+     * 用於查詢在特定時間點之後有任何變動（新增或修改）的資料。
+     * 修正：確保參數類型為 LocalDateTime，以對齊 Product.java 中的 updatedAt 欄位。
      */
-    List<Product> findByUpdatedAtAfter(OffsetDateTime lastSyncTime);
-    
+    List<Product> findByUpdatedAtAfter(LocalDateTime lastUpdate);
+
     /**
-     * 修正：將「商品代號」改為對應實體類中的變數名 「code」
-     * 這樣 Spring Boot 啟動時才不會因為找不到欄位而崩潰
+     * 2. 關鍵字搜尋：代號
+     * 支援輸入部分代號進行模糊搜尋。
      */
     List<Product> findByCodeContaining(String code);
 
     /**
-     * 新增：根據名稱搜尋的功能，這在您的查價系統非常實用
+     * 3. 關鍵字搜尋：名稱
+     * 支援輸入部分零件名稱進行模糊搜尋。
      */
     List<Product> findByNameContaining(String name);
+
+    /**
+     * 4. 關鍵字搜尋：車種
+     * 支援根據適用車型進行過濾。
+     */
+    List<Product> findByCarModelContaining(String carModel);
 }

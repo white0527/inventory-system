@@ -26,40 +26,30 @@ public class Product {
     private Double priceRetail; // 零售價
     private Integer stock;      // 庫存
 
-    // 新增：最後更新時間，這是「增量同步」的核心
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedAt; // 統一使用 LocalDateTime
 
-    // --- 自動更新時間的機制 ---
     @PrePersist
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now(); // 每次存檔自動更新時間
     }
 
     // --- Getter and Setter ---
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public String getCode() { return code; }
     public void setCode(String code) { this.code = code; }
-
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-
     public String getCarModel() { return carModel; }
     public void setCarModel(String carModel) { this.carModel = carModel; }
-
     public Double getPricePeer() { return pricePeer; }
     public void setPricePeer(Double pricePeer) { this.pricePeer = pricePeer; }
-
     public Double getPriceRetail() { return priceRetail; }
     public void setPriceRetail(Double priceRetail) { this.priceRetail = priceRetail; }
-
     public Integer getStock() { return stock; }
     public void setStock(Integer stock) { this.stock = stock; }
-
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
