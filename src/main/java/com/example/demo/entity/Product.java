@@ -15,7 +15,7 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 自動編號主鍵
+    private Long id; // 自動編號主鍵，必須是 Long
 
     @Column(name = "商品代號")
     private String code;
@@ -33,18 +33,18 @@ public class Product {
     private String originalCode;
 
     @Column(name = "庫存量")
-    private Integer stock; // 類型為 int4
+    private Integer stock; // 類型 int4
 
     @Column(name = "車行價")
-    private Integer pricePeer; // 類型為 int4
+    private Integer pricePeer; // 類型 int4
 
     @Column(name = "零售價")
-    private Integer priceRetail; // 類型為 int4
+    private Integer priceRetail; // 類型 int4
 
     @Column(name = "成本價")
-    private Integer priceCost; // 類型為 int4
+    private Integer priceCost; // 類型 int4
 
-    // 新增：最後更新時間，這是實現手機離線同步的關鍵
+    // 關鍵修正：確保變數名稱為 updatedAt，首字母大寫的 A 對應 Repository 的 findByUpdatedAt
     @Column(name = "updated_at", insertable = false, updatable = false)
     private OffsetDateTime updatedAt;
 
@@ -80,7 +80,6 @@ public class Product {
     public Integer getPriceCost() { return priceCost; }
     public void setPriceCost(Integer priceCost) { this.priceCost = priceCost; }
 
-    // 新增：updatedAt 的存取方法
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

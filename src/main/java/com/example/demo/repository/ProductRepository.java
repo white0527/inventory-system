@@ -17,14 +17,20 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     /**
      * 增量同步核心功能：根據時間戳記撈出「最後更新時間」晚於指定時間的商品
-     * 這樣手機第二次登入時，只需要下載這段時間內變動的資料即可
-     * * @param lastSyncTime 上次手機同步的時間
+     * 這裡的 UpdatedAt 必須完全對應 Product.java 裡的變數名 updatedAt
+     * @param lastSyncTime 上次手機同步的時間
      * @return 變動過的商品清單
      */
     List<Product> findByUpdatedAtAfter(OffsetDateTime lastSyncTime);
     
     /**
-     * 您也可以保留原本根據商品代號搜尋的功能，供後端管理介面使用
+     * 修正：將「商品代號」改為對應實體類中的變數名 「code」
+     * 這樣 Spring Boot 啟動時才不會因為找不到欄位而崩潰
      */
-    List<Product> findBy商品代號Containing(String 商品代號);
+    List<Product> findByCodeContaining(String code);
+
+    /**
+     * 新增：根據名稱搜尋的功能，這在您的查價系統非常實用
+     */
+    List<Product> findByNameContaining(String name);
 }
