@@ -19,7 +19,8 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String code;        // 零件代號
+    @Column(unique = true)
+    private String code;        // 零件代號 (作為唯一標識)
     private String name;        // 零件名稱
     private String carModel;    // 適用車種
     private Double pricePeer;   // 車行價
@@ -27,15 +28,18 @@ public class Product {
     private Integer stock;      // 庫存
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt; // 統一使用 LocalDateTime
+    private LocalDateTime updatedAt;
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted = false; // 軟刪除標記
 
     @PrePersist
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now(); // 每次存檔自動更新時間
+        this.updatedAt = LocalDateTime.now(); // 自動更新時間戳記
     }
 
-    // --- Getter and Setter ---
+    // Getter and Setter
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getCode() { return code; }
@@ -52,4 +56,6 @@ public class Product {
     public void setStock(Integer stock) { this.stock = stock; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public boolean isIsDeleted() { return isDeleted; }
+    public void setIsDeleted(boolean isDeleted) { this.isDeleted = isDeleted; }
 }

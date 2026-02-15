@@ -1,8 +1,8 @@
 package com.example.demo.controller;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -11,7 +11,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.entity.Product;
-import com.example.demo.repository.ProductRepository;
 
 @RestController
 @RequestMapping("/api/excel")
@@ -28,73 +28,62 @@ import com.example.demo.repository.ProductRepository;
 public class ExcelController {
 
     @Autowired
-    private ProductRepository productRepository;
+    private JdbcTemplate jdbcTemplate;
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadExcel(@RequestParam("file") MultipartFile file) {
+    public String uploadExcel(@RequestParam("file") MultipartFile file) {
+        // 立即回應，讓前端不會因為三萬筆資料處理太久而 Timeout
+        processExcelAsync(file);
+        return "檔案已接收，系統正在背景處理三萬筆資料，請稍後在手機端查看同步結果。";
+    }
+
+    @Async // 需在 DemoApplication 加入 @EnableAsync
+    public void processExcelAsync(MultipartFile file) {
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
             List<Product> products = new ArrayList<>();
+            LocalDateTime now = LocalDateTime.now();
 
             for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue; // 跳過標題列
-                
-                // 檢查關鍵欄位是否為空，避免匯入空白行
-                if (row.getCell(0) == null || row.getCell(1) == null) continue;
-
-                Product p = new Product();
-                // 索引順序：0:代號, 1:名稱, 2:車種, 3:車行價, 4:零售價, 5:庫存
-                p.setCode(getCellValue(row.getCell(0)));
-                p.setName(getCellValue(row.getCell(1)));
-                p.setCarModel(getCellValue(row.getCell(2)));
-                
-                // 使用優化後的數值解析，避免格式錯誤
-                p.setPricePeer(parseSafeDouble(getCellValue(row.getCell(3))));
-                p.setPriceRetail(parseSafeDouble(getCellValue(row.getCell(4))));
-                p.setStock(parseSafeInt(getCellValue(row.getCell(5))));
-                
-                products.add(p);
+                if (row.getRowNum() == 0) continue;
+                try {
+                    Product p = new Product();
+                    p.setCode(getCellValue(row.getCell(0)));
+                    p.setName(getCellValue(row.getCell(1)));
+                    p.setCarModel(getCellValue(row.getCell(2)));
+                    p.setPricePeer(Double.parseDouble(getCellValue(row.getCell(3))));
+                    p.setPriceRetail(Double.parseDouble(getCellValue(row.getCell(4))));
+                    p.setStock(Integer.parseInt(getCellValue(row.getCell(5))));
+                    p.setUpdatedAt(now);
+                    products.add(p);
+                } catch (Exception e) { /* 跳過格式錯誤的行 */ }
             }
 
-            if (!products.isEmpty()) {
-                // saveAll 會觸發 Product.java 裡的 @PrePersist 自動填入更新時間
-                productRepository.saveAll(products); 
-                return ResponseEntity.ok(Map.of("success", true, "count", products.size()));
-            }
-            return ResponseEntity.badRequest().body("檔案內容為空或格式不符");
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("匯入失敗: " + e.getMessage());
-        }
-    }
+            // 使用 PostgreSQL 的 ON CONFLICT 語法達成「存在即更新，不存在則插入」
+            String sql = "INSERT INTO products (code, name, car_model, price_peer, price_retail, stock, updated_at, is_deleted) " +
+                         "VALUES (?, ?, ?, ?, ?, ?, ?, false) " +
+                         "ON CONFLICT (code) DO UPDATE SET " +
+                         "name = EXCLUDED.name, car_model = EXCLUDED.car_model, " +
+                         "price_peer = EXCLUDED.price_peer, price_retail = EXCLUDED.price_retail, " +
+                         "stock = EXCLUDED.stock, updated_at = EXCLUDED.updated_at, is_deleted = false";
 
-    // 安全解析 Double
-    private Double parseSafeDouble(String val) {
-        try {
-            return Double.parseDouble(val);
+            jdbcTemplate.batchUpdate(sql, products, 1000, (ps, product) -> {
+                ps.setString(1, product.getCode());
+                ps.setString(2, product.getName());
+                ps.setString(3, product.getCarModel());
+                ps.setDouble(4, product.getPricePeer());
+                ps.setDouble(5, product.getPriceRetail());
+                ps.setInt(6, product.getStock());
+                ps.setObject(7, product.getUpdatedAt());
+            });
         } catch (Exception e) {
-            return 0.0;
-        }
-    }
-
-    // 安全解析 Integer
-    private Integer parseSafeInt(String val) {
-        try {
-            return Integer.parseInt(val);
-        } catch (Exception e) {
-            return 0;
+            e.printStackTrace();
         }
     }
 
     private String getCellValue(Cell cell) {
-        if (cell == null) return ""; // 改為空字串較安全
-        if (cell.getCellType() == CellType.NUMERIC) {
-            // 防止科學記號出現，直接取數值
-            double numericValue = cell.getNumericCellValue();
-            if (numericValue == (long) numericValue) {
-                return String.valueOf((long) numericValue);
-            }
-            return String.valueOf(numericValue);
-        }
-        return cell.getStringCellValue().trim();
+        if (cell == null) return "0";
+        return cell.getCellType() == CellType.NUMERIC ? 
+               String.valueOf((long)cell.getNumericCellValue()) : cell.getStringCellValue();
     }
 }
