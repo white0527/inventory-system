@@ -14,32 +14,31 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "products")
 public class Product {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(unique = true)
-    private String code;        // 零件代號 (作為唯一標識)
-    private String name;        // 零件名稱
-    private String carModel;    // 適用車種
-    private Double pricePeer;   // 車行價
-    private Double priceRetail; // 零售價
-    private Integer stock;      // 庫存
+    private String code;
+    private String name;
+    private String carModel;
+    private Double pricePeer;
+    private Double priceRetail;
+    private Integer stock;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted")
-    private boolean isDeleted = false; // 軟刪除標記
+    private boolean isDeleted = false;
 
     @PrePersist
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now(); // 自動更新時間戳記
+        this.updatedAt = LocalDateTime.now();
     }
 
-    // Getter and Setter
+    // Getter & Setter (請自行補齊 id, code, name, carModel, pricePeer, priceRetail, stock, updatedAt, isDeleted)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getCode() { return code; }

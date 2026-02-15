@@ -1,9 +1,10 @@
 const API_BASE = ""; 
 let db;
 
+// 1. 初始化
 document.addEventListener("DOMContentLoaded", async () => {
     await initDB();
-    checkLoginStatus();
+    checkLoginStatus(); // 修正找不到定義的問題
     if (localStorage.getItem('isLoggedIn') === 'true') {
         syncProducts();
     }
@@ -11,82 +12,77 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 function initDB() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open("XiangYiDB", 4); // 版本更新以支援新邏輯
+        const request = indexedDB.open("XiangYiDB", 4);
         request.onupgradeneeded = (e) => {
             const database = e.target.result;
             if (database.objectStoreNames.contains("products")) {
                 database.deleteObjectStore("products");
             }
-            const store = database.createObjectStore("products", { keyPath: "id" });
-            store.createIndex("code", "code", { unique: false });
-            store.createIndex("name", "name", { unique: false });
+            database.createObjectStore("products", { keyPath: "id" });
         };
         request.onsuccess = (e) => { db = e.target.result; resolve(); };
-        request.onerror = () => reject("DB Error");
+        request.onerror = () => reject();
     });
 }
 
-async function syncProducts() {
-    const status = document.getElementById('sync-status');
-    const lastSync = localStorage.getItem('lastSyncTime') || "1970-01-01T00:00:00Z";
-
+// 2. 登入功能
+async function handleLogin() {
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+    
     try {
-        if (status) status.innerText = "⏳ 正在同步最新零件資料...";
-        // 增量同步請求
-        const response = await fetch(`${API_BASE}/api/sync/download?lastSyncTime=${lastSync}`);
-        const updates = await response.json();
+        const res = await fetch(`${API_BASE}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pass })
+        });
+        const result = await res.json();
+        if (result.success) {
+            localStorage.setItem('isLoggedIn', 'true');
+            checkLoginStatus();
+            syncProducts();
+        } else { alert("登入失敗"); }
+    } catch (e) { alert("連線錯誤"); }
+}
 
+function checkLoginStatus() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    document.getElementById('login-section').style.display = isLoggedIn ? 'none' : 'flex';
+    document.getElementById('main-system').style.display = isLoggedIn ? 'flex' : 'none';
+}
+
+async function syncProducts() {
+    const lastSync = localStorage.getItem('lastSyncTime') || "1970-01-01T00:00:00Z";
+    try {
+        const res = await fetch(`${API_BASE}/api/sync/download?lastSyncTime=${lastSync}`);
+        const updates = await res.json();
         if (updates.length > 0) {
             const tx = db.transaction("products", "readwrite");
             const store = tx.objectStore("products");
-            
-            updates.forEach(p => {
-                if (p.isDeleted) {
-                    store.delete(p.id); // 處理軟刪除
-                } else {
-                    store.put(p); // 存入本機硬碟
-                }
-            });
-            
+            updates.forEach(p => p.isDeleted ? store.delete(p.id) : store.put(p));
             localStorage.setItem('lastSyncTime', new Date().toISOString());
-            if (status) status.innerText = `✅ 已同步 ${updates.length} 筆變更`;
-        } else {
-            if (status) status.innerText = "✅ 資料已是最新";
         }
-        setTimeout(() => { if(status) status.style.display='none'; }, 3000);
-    } catch (e) {
-        if (status) status.innerText = "⚠️ 離線模式：目前使用本機資料";
-    }
+    } catch (e) { console.log("離線模式"); }
 }
 
 async function fetchProductInfo(input) {
-    const keyword = input.value.trim().toLowerCase();
-    const resultList = document.getElementById('inventory-list');
-    if (!keyword || !db) { resultList.innerHTML = ""; return; }
-    
-    // 完全脫離網路，秒級搜尋本地資料庫
+    const kw = input.value.trim().toLowerCase();
+    if (!kw || !db) return;
     const tx = db.transaction("products", "readonly");
     const store = tx.objectStore("products");
-    const request = store.getAll(); 
-
-    request.onsuccess = () => {
-        const filtered = request.result.filter(p => 
-            (p.code && p.code.toLowerCase().includes(keyword)) || 
-            (p.name && p.name.toLowerCase().includes(keyword)) ||
-            (p.carModel && p.carModel.toLowerCase().includes(keyword))
-        ).slice(0, 50); 
-
-        resultList.innerHTML = filtered.map(p => `
-            <div class="product-card" style="background:white; padding:15px; border-radius:10px; margin-bottom:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-                <div style="font-weight:bold;">${p.name}</div>
-                <div style="font-size:13px; color:gray;">代號: ${p.code} | 車種: ${p.carModel}</div>
-                <div style="display:flex; justify-content:space-between; margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
-                    <div style="color:#007AFF;">車行價: $${p.pricePeer}</div>
-                    <div style="color:#28a745;">零售價: $${p.priceRetail}</div>
-                </div>
+    store.getAll().onsuccess = (e) => {
+        const results = e.target.result.filter(p => 
+            p.name.toLowerCase().includes(kw) || p.code.toLowerCase().includes(kw)
+        ).slice(0, 50);
+        document.getElementById('inventory-list').innerHTML = results.map(p => `
+            <div class="product-card">
+                <b>${p.name}</b><br>代號: ${p.code} | 價格: $${p.pricePeer}
             </div>
         `).join('');
     };
 }
 
-// 登入、登出與切換畫面邏輯... (維持不變)
+function logout() {
+    localStorage.clear();
+    location.reload();
+}

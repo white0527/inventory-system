@@ -32,12 +32,11 @@ public class ExcelController {
 
     @PostMapping("/upload")
     public String uploadExcel(@RequestParam("file") MultipartFile file) {
-        // 立即回應，讓前端不會因為三萬筆資料處理太久而 Timeout
         processExcelAsync(file);
-        return "檔案已接收，系統正在背景處理三萬筆資料，請稍後在手機端查看同步結果。";
+        return "檔案已接收，系統正在背景處理中...";
     }
 
-    @Async // 需在 DemoApplication 加入 @EnableAsync
+    @Async
     public void processExcelAsync(MultipartFile file) {
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -56,10 +55,9 @@ public class ExcelController {
                     p.setStock(Integer.parseInt(getCellValue(row.getCell(5))));
                     p.setUpdatedAt(now);
                     products.add(p);
-                } catch (Exception e) { /* 跳過格式錯誤的行 */ }
+                } catch (Exception e) {}
             }
 
-            // 使用 PostgreSQL 的 ON CONFLICT 語法達成「存在即更新，不存在則插入」
             String sql = "INSERT INTO products (code, name, car_model, price_peer, price_retail, stock, updated_at, is_deleted) " +
                          "VALUES (?, ?, ?, ?, ?, ?, ?, false) " +
                          "ON CONFLICT (code) DO UPDATE SET " +
@@ -76,9 +74,7 @@ public class ExcelController {
                 ps.setInt(6, product.getStock());
                 ps.setObject(7, product.getUpdatedAt());
             });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private String getCellValue(Cell cell) {
