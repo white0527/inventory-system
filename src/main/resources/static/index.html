@@ -4,373 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>祥易離線查價系統</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1041/1041888.png">
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1041/1041888.png">
+    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
+        /* 這裡保留您原本的 iOS 風格 CSS，但確保 ID 名稱與 JS 對齊 */
         :root { --ios-bg: #F2F2F7; --ios-blue: #007AFF; --ios-card: #FFFFFF; }
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif; }
         body { margin: 0; background-color: var(--ios-bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* 登入畫面 */
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--ios-bg); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; transition: 0.3s; }
+        #login-section { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--ios-bg); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; }
         .login-input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #ccc; font-size: 16px; }
-        .login-btn { width: 100%; padding: 15px; border-radius: 12px; background: var(--ios-blue); color: white; border: none; font-size: 18px; font-weight: bold; }
+        .login-btn { width: 100%; padding: 15px; border-radius: 12px; background: var(--ios-blue); color: white; border: none; font-size: 18px; font-weight: bold; cursor: pointer; }
 
-        /* 頂部與內容 */
-        .nav-bar { background: rgba(255,255,255,0.9); height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-weight: bold; border-bottom: 1px solid #ddd; }
-        .logout-btn { background: none; border: none; color: #ef4444; font-size: 14px; cursor: pointer; font-weight: bold;}
-        .content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 100px; }
-        
-        /* 搜尋框 */
-        .search-wrapper { background: #E5E5EA; border-radius: 10px; height: 44px; display: flex; align-items: center; padding: 0 12px; }
-        .search-input { border: none; background: transparent; font-size: 17px; width: 100%; outline: none; height: 100%; }
-
-        /* 商品卡片 */
-        .ios-card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        .p-title { font-size: 18px; font-weight: bold; margin-bottom: 8px; color: #1e293b; line-height: 1.4; }
-        .p-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; font-size: 14px; color: #475569; }
-        .p-code { background: #f1f5f9; padding: 4px 8px; border-radius: 6px; display: inline-block; font-family: monospace; }
-        .p-model { color: #007AFF; font-weight: 500; }
-        
-        .price-section { display: flex; justify-content: space-between; border-top: 1px solid #eee; padding-top: 12px; text-align: center; }
-        .price-box { flex: 1; border-right: 1px solid #eee; }
-        .price-box:last-child { border-right: none; }
-        .price-label { font-size: 11px; color: #888; margin-bottom: 4px; }
-        .price-val { font-size: 18px; font-weight: bold; }
-
-        /* 功能選單 */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .menu-item { background: white; padding: 20px; border-radius: 12px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; }
-        
-        /* 底部導航 */
-        .bottom-nav { background: white; border-top: 1px solid #ccc; height: 80px; display: flex; justify-content: space-around; padding-top: 10px; position: fixed; bottom: 0; width: 100%; }
-        .nav-btn { background: none; border: none; display: flex; flex-direction: column; align-items: center; color: #888; font-size: 10px; width: 50%; }
-        .nav-btn i { font-size: 24px; margin-bottom: 4px; }
-        .nav-btn.active { color: var(--ios-blue); }
-
+        .nav-bar { background: white; height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid #ddd; }
         .status-bar { font-size: 12px; text-align: center; padding: 5px; color: #666; background: #eee; }
+        
+        /* 離線警告條 */
+        .offline-banner { background: #fee2e2; color: #ef4444; padding: 8px; text-align: center; font-size: 12px; display: none; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
+    <div id="login-section">
         <h1 style="color: #007AFF; margin-bottom: 30px;"><i class="fas fa-cubes"></i> 祥易查價系統</h1>
-        <input type="text" id="login-user" class="login-input" placeholder="帳號">
-        <input type="password" id="login-pass" class="login-input" placeholder="密碼">
-        <button class="login-btn" onclick="performLogin()">登入系統</button>
+        <input type="text" id="username" class="login-input" placeholder="帳號">
+        <input type="password" id="password" class="login-input" placeholder="密碼">
+        <button type="button" class="login-btn" onclick="handleLogin()">登入系統</button>
     </div>
 
-    <div id="main-app" style="display:none; height: 100vh; flex-direction: column;">
+    <div id="main-system" style="display:none; height: 100vh; flex-direction: column;">
         <div class="nav-bar">
-            <span>祥易查價 <span id="data-count" style="font-size:12px; color:gray; font-weight:normal;">(0筆)</span></span>
-            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 登出</button>
+            <span>祥易系統 <small id="data-count"></small></span>
+            <button class="logout-btn" onclick="logout()" style="color:red; background:none; border:none;">登出</button>
         </div>
-        <div class="status-bar" id="sync-status">等待資料同步...</div>
+        
+        <div class="offline-banner">⚠️ 目前處於離線模式，使用本地快取資料</div>
+        <div class="status-bar" id="sync-status">資料同步中...</div>
 
-        <div id="view-search" class="content">
-            <div class="search-wrapper">
-                <i class="fas fa-search" style="color:gray; margin-right:10px;"></i>
-                <input type="text" id="keyword" class="search-input" placeholder="輸入商品代號、名稱或車種" oninput="searchLocal()">
+        <div class="content" style="flex:1; overflow-y:auto; padding:15px;">
+            <div class="search-wrapper" style="margin-bottom:15px;">
+                <input type="text" id="inv-search" class="login-input" placeholder="輸入代號、名稱或車種" oninput="fetchProductInfo(this)">
             </div>
-            <div id="result-list"></div>
-            <div id="empty-hint" style="text-align:center; color:#999; margin-top:50px;">
-            </div>
-        </div>
-
-        <div id="view-menu" class="content" style="display:none;">
-            
-            <h3 style="color:#333; margin-top:0;"><i class="fas fa-box"></i> 庫存資料管理</h3>
-            <div class="menu-grid">
-                <div class="menu-item" onclick="syncData()">
-                    <i class="fas fa-sync" style="color: #007AFF; font-size: 30px;"></i><span>手動更新資料</span>
+            <div id="inventory-list">
                 </div>
-                <div class="menu-item" onclick="downloadExcel()">
-                    <i class="fas fa-file-export" style="color: #28a745; font-size: 30px;"></i><span>匯出 Excel</span>
-                </div>
-                <div class="menu-item" onclick="triggerImport()" style="grid-column: span 2;">
-                    <i class="fas fa-file-import" style="color: #e0a800; font-size: 30px;"></i><span>匯入 Excel (更新庫存與價格)</span>
-                </div>
-                <input type="file" id="excel-input" accept=".xlsx" style="display: none;" onchange="uploadExcel(this)">
-            </div>
-
-            <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ddd;">
-            <h3 style="color:#333; margin-top:0;"><i class="fas fa-users"></i> 員工帳號管理</h3>
-            <div style="background:white; padding:15px; border-radius:12px; margin-bottom:15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <div style="display:flex; gap:10px; margin-bottom:15px;">
-                    <input type="text" id="new-emp-user" placeholder="新帳號" style="flex:1; padding:10px; border:1px solid #ccc; border-radius:8px;">
-                    <input type="text" id="new-emp-pass" placeholder="密碼" style="flex:1; padding:10px; border:1px solid #ccc; border-radius:8px;">
-                    <button onclick="addEmployee()" style="background:#007AFF; color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold; cursor:pointer;">新增</button>
-                </div>
-                <div id="employee-list" style="font-size:14px;">
-                    </div>
-            </div>
-
-        </div>
-
-        <div class="bottom-nav">
-            <button class="nav-btn active" onclick="switchTab('view-search', this)"><i class="fas fa-search"></i>查價</button>
-            <button class="nav-btn" id="nav-btn-admin" onclick="switchTab('view-menu', this)"><i class="fas fa-cog"></i>管理</button>
         </div>
     </div>
 
-    <script>
-        const API_BASE_URL = "https://xiangyi-system.onrender.com"; 
-
-        let localProducts = []; 
-        let userRole = 'staff'; 
-
-        // 1. 登入連線驗證
-        async function performLogin() {
-            const btn = document.querySelector('.login-btn');
-            const u = document.getElementById('login-user').value.trim();
-            const p = document.getElementById('login-pass').value.trim();
-
-            if (!u || !p) { alert("請輸入帳號和密碼"); return; }
-
-            btn.innerText = "驗證帳號中...";
-            btn.disabled = true;
-
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/users/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: u, password: p })
-                });
-                
-                const result = await res.json();
-                
-                if (result.success) {
-                    userRole = result.role;
-                    localStorage.setItem('xiangyi_role', userRole);
-                    setupUIByRole();
-                    
-                    btn.innerText = "正在下載庫存...";
-                    await syncData();
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('main-app').style.display = 'flex';
-                } else {
-                    alert("❌ " + result.message);
-                    btn.innerText = "登入系統";
-                    btn.disabled = false;
-                }
-            } catch (e) {
-                alert("⚠️ 連線伺服器失敗，請確認網路或系統狀態！");
-                btn.innerText = "登入系統";
-                btn.disabled = false;
-            }
-        }
-
-        // 權限 UI 控制
-        function setupUIByRole() {
-            const adminNavBtn = document.getElementById('nav-btn-admin');
-            if (userRole === 'staff') {
-                adminNavBtn.style.display = 'none'; 
-            } else {
-                adminNavBtn.style.display = 'flex'; 
-                loadEmployees(); 
-            }
-        }
-
-        function logout() {
-            if(confirm("確定要登出嗎？")) {
-                localStorage.removeItem('xiangyi_role');
-                location.reload(); 
-            }
-        }
-
-        // --- 帳號管理功能 ---
-        async function loadEmployees() {
-            if(userRole !== 'boss') return;
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/users`);
-                const users = await res.json();
-                const list = document.getElementById('employee-list');
-                list.innerHTML = '';
-                
-                users.forEach(u => {
-                    const isBoss = u.role === 'boss';
-                    const icon = isBoss ? '👑' : '👤';
-                    const delBtn = isBoss ? '' : `<button onclick="deleteEmployee(${u.id})" style="color:#ef4444; background:none; border:none; padding:5px; font-size:16px; cursor:pointer;"><i class="fas fa-trash"></i></button>`;
-                    
-                    list.innerHTML += `
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee;">
-                            <div>${icon} 帳號: <b>${u.username}</b> <span style="color:#888; font-size:12px; margin-left:10px;">密碼: ${u.password}</span></div>
-                            ${delBtn}
-                        </div>`;
-                });
-            } catch(e) { console.error("無法載入帳號清單"); }
-        }
-
-        async function addEmployee() {
-            const u = document.getElementById('new-emp-user').value.trim();
-            const p = document.getElementById('new-emp-pass').value.trim();
-            if(!u || !p) { alert("請輸入新帳號與密碼"); return; }
-            
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/users`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: u, password: p })
-                });
-                const result = await res.json();
-                if(result.success) {
-                    alert("✅ 新增成功");
-                    document.getElementById('new-emp-user').value = '';
-                    document.getElementById('new-emp-pass').value = '';
-                    loadEmployees();
-                } else {
-                    alert("❌ " + result.message);
-                }
-            } catch(e) { alert("新增失敗"); }
-        }
-
-        async function deleteEmployee(id) {
-            if(!confirm("確定要刪除此員工帳號嗎？(刪除後該員工將無法登入)")) return;
-            try {
-                await fetch(`${API_BASE_URL}/api/users/${id}`, { method: 'DELETE' });
-                loadEmployees();
-            } catch(e) { alert("刪除失敗"); }
-        }
-
-        // --- 原本的資料與搜尋功能 ---
-        async function syncData() {
-            const status = document.getElementById('sync-status');
-            status.innerText = "🔄 正在連線雲端更新資料...";
-            status.style.background = "#fff3cd";
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/products/all`);
-                if (!response.ok) throw new Error("連線失敗");
-                
-                const data = await response.json();
-                localProducts = data;
-                localStorage.setItem('xiangyi_products', JSON.stringify(data));
-
-                document.getElementById('data-count').innerText = `(${data.length}筆)`;
-                status.innerText = `✅ 資料已更新 (最後同步: ${new Date().toLocaleTimeString()})`;
-                status.style.background = "#d4edda";
-                
-                document.getElementById('keyword').value = '';
-                document.getElementById('result-list').innerHTML = '';
-
-            } catch (e) {
-                status.innerText = "⚠️ 無法連線，使用上次的離線資料";
-                status.style.background = "#f8d7da";
-                const cached = localStorage.getItem('xiangyi_products');
-                if (cached) {
-                    localProducts = JSON.parse(cached);
-                    document.getElementById('data-count').innerText = `(${localProducts.length}筆 - 離線)`;
-                }
-            }
-        }
-
-        function searchLocal() {
-            const key = document.getElementById('keyword').value.toUpperCase().trim();
-            const list = document.getElementById('result-list');
-            const hint = document.getElementById('empty-hint');
-            
-            list.innerHTML = '';
-            
-            if (!key) {
-                hint.style.display = 'block';
-                return;
-            }
-            hint.style.display = 'none';
-
-            const results = localProducts.filter(p => 
-                (p.code && p.code.toUpperCase().includes(key)) || 
-                (p.name && p.name.toUpperCase().includes(key)) ||
-                (p.carModel && p.carModel.toUpperCase().includes(key))
-            ).slice(0, 20);
-
-            if (results.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">查無資料</div>';
-                return;
-            }
-
-            results.forEach(p => {
-                const stockColor = p.stock < 3 ? 'red' : 'black'; 
-
-                // 移除成本區塊，僅顯示庫存、同業價、零售價
-                const html = `
-                    <div class="ios-card">
-                        <div class="p-title">${p.name}</div>
-                        <div class="p-info-grid">
-                            <div>📦 料號：<span class="p-code">${p.code}</span></div>
-                            <div>🏍️ 車種：<span class="p-model">${p.carModel || '通用'}</span></div>
-                        </div>
-                        
-                        <div class="price-section">
-                            <div class="price-box">
-                                <div class="price-label">庫存量</div>
-                                <div class="price-val" style="color: ${stockColor};">${p.stock || 0}</div>
-                            </div>
-                            <div class="price-box">
-                                <div class="price-label">車行同業價</div>
-                                <div class="price-val" style="color: #007AFF;">$${p.pricePeer || 0}</div>
-                            </div>
-                            <div class="price-box">
-                                <div class="price-label">門市零售價</div>
-                                <div class="price-val" style="color: #28a745;">$${p.priceRetail || 0}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                list.innerHTML += html;
-            });
-        }
-
-        async function downloadExcel() {
-            if(!confirm("要匯出資料進行修改嗎？")) return;
-            window.location.href = `${API_BASE_URL}/api/excel/export`;
-        }
-
-        function triggerImport() { document.getElementById('excel-input').click(); }
-
-        async function uploadExcel(input) {
-            if (input.files.length === 0) return;
-            const formData = new FormData();
-            formData.append("file", input.files[0]);
-            alert("正在上傳並更新資料庫...");
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/excel/import`, { method: 'POST', body: formData });
-                const result = await response.json();
-                if (result.success) {
-                    alert("✅ 更新成功！系統將自動重新同步資料...");
-                    await syncData(); 
-                } else {
-                    alert("❌ 失敗：" + result.message);
-                }
-            } catch (e) {
-                alert("上傳錯誤");
-            }
-            input.value = '';
-        }
-
-        function switchTab(viewId, btn) {
-            document.querySelectorAll('.content').forEach(el => el.style.display = 'none');
-            document.getElementById(viewId).style.display = 'block';
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-
-        window.onload = () => {
-            const savedRole = localStorage.getItem('xiangyi_role');
-            if(savedRole && localStorage.getItem('xiangyi_products')) {
-                userRole = savedRole;
-                setupUIByRole();
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-app').style.display = 'flex';
-                localProducts = JSON.parse(localStorage.getItem('xiangyi_products'));
-                document.getElementById('data-count').innerText = `(${localProducts.length}筆 - 離線)`;
-                syncData();
-            }
-        };
-    </script>
+    <script src="js/script.js"></script>
 </body>
 </html>
